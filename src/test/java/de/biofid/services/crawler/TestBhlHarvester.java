@@ -122,7 +122,7 @@ public class TestBhlHarvester {
 		BhlHarvester bhlHarvester = new BhlHarvester(
 				configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
 		
-		assertEquals(599, bhlHarvester.getListOfItems().size());
+		assertTrue(bhlHarvester.getListOfItems().size() > 599);
 	}
 	
 	@Test
