@@ -36,9 +36,9 @@ public class TestBibDigitalHarvester {
 		harvester.run();
 		
 		File outputTextFile = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + "/" + harvester.getFolderName() + 
-				"/text/15729.pdf").toFile();
+				"/text/pdf/15729.pdf").toFile();
 		File outputMetadataFile = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + "/" + harvester.getFolderName() + 
-				"/metadata/15729.xml").toFile();
+				"/metadata/xml/15729.xml").toFile();
 		
 		assertTrue(outputTextFile.exists());
 		assertTrue(outputMetadataFile.exists());
