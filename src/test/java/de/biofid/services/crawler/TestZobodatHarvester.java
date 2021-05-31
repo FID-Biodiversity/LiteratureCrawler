@@ -1,20 +1,22 @@
 package de.biofid.services.crawler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+import org.junit.After;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.commons.io.FileUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-import org.junit.After;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 
 public class TestZobodatHarvester {
 	
@@ -35,30 +37,29 @@ public class TestZobodatHarvester {
 	
 	private boolean didTestDirectoryExistBeforeTest = true;
 	private File testDirectory = null;
-	
+
 	@Test
 	public void testFetchingItemListDirectly() throws IOException {
 		DummyConfigurator configurator = setup();
-		String startingURL = "https://www.zobodat.at/publikation_volumes.php?id=57342";
-		
 		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
 				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
-		Document siteWithItems = zobodatHarvester.getDocumentFromUrl(startingURL);
-		Elements itemList = zobodatHarvester.getItemListFromWebsite(siteWithItems);
-		assertEquals(7, itemList.size());
+		Document zobodatHtml = loadDocumentHtml("src/test/resources/zobodatIndex.html");
+
+		Elements itemList = zobodatHarvester.getItemListFromWebsite(zobodatHtml);
+		assertEquals(2, itemList.size());
 		
 		zobodatHarvester.iterateItems(itemList);
-		assertEquals(7, zobodatHarvester.getMetadataListSize());
+		assertEquals(2, zobodatHarvester.getMetadataListSize());
 		
 		JSONArray itemMetadataJson = zobodatHarvester.getMetadataListAsJSONArray();
-		assertEquals(7, itemMetadataJson.length());
+		assertEquals(2, itemMetadataJson.length());
 		
 		for (int i = 0; i < itemMetadataJson.length(); ++i) {
 			JSONObject item = itemMetadataJson.getJSONObject(i);
 			areAllMetadataFieldsSerialized(item);
 		}
 		
-		JSONObject item2 = itemMetadataJson.getJSONObject(2);
+		JSONObject item2 = itemMetadataJson.getJSONObject(0);
 		JSONObject item2Citation = item2.getJSONObject(METADATA_CITATION);
 		assertTrue(item2Citation.getJSONArray(CITATION_AUTHORS).length() == 1);
 		assertTrue(item2Citation.getJSONArray(CITATION_AUTHORS).toList().contains("Hugo Krüss"));
@@ -69,7 +70,7 @@ public class TestZobodatHarvester {
 		assertEquals("1", item2Citation.get(CITATION_FIRST_PAGE));
 		assertEquals("8", item2Citation.get(CITATION_LAST_PAGE));
 		
-		JSONObject item4 = itemMetadataJson.getJSONObject(4);
+		JSONObject item4 = itemMetadataJson.getJSONObject(1);
 		JSONObject item4Citation = item4.getJSONObject(METADATA_CITATION);
 		assertTrue(item4Citation.getJSONArray(CITATION_AUTHORS).length() == 1);
 		assertTrue(item4Citation.getJSONArray(CITATION_AUTHORS).toList().contains("Heinrich Gustav Kirchenpauer"));
@@ -176,5 +177,10 @@ public class TestZobodatHarvester {
 		
 		DummyConfigurator configurator = getConfigurator();
 		return configurator;
+	}
+
+	private Document loadDocumentHtml(String filePath) throws IOException {
+		File testFilePath = new File(filePath);
+		return Jsoup.parse(testFilePath, "UTF-8");
 	}
 }
