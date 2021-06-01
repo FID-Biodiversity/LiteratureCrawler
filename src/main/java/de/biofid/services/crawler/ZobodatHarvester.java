@@ -222,11 +222,15 @@ public class ZobodatHarvester extends Harvester {
 		return ZOBODAT_URL + url;
 	}
 	
-	private Citation getCitationFromUrl(URL url) {
+	public Citation getCitationFromUrl(URL url) {
 		Citation citation;
 		try {
 			Document citationSite = getDocumentFromUrl(url.toString());
 			Element citationContainer = citationSite.selectFirst(SELECTOR_CITATION_CONTAINER);
+			if (citationContainer == null) {
+				throw new IOException("No citation container available");
+			}
+
 			citation = new Citation(citationContainer);
 			logger.debug("Generated citation: " + citation.toString());
 		} catch (IOException e) {
@@ -261,7 +265,9 @@ public class ZobodatHarvester extends Harvester {
 		if (itemIdMatcher.find()) {
 			 itemID = Long.parseLong(itemIdMatcher.group(1));
 		}
-		
+
+		logger.debug("Generated Item ID: " + itemID);
+
 		return itemID;
 	}
 	
@@ -297,7 +303,7 @@ public class ZobodatHarvester extends Harvester {
 		return null;
 	}
 	
-	private class Citation {
+	public class Citation {
 		public List<String> authors = new ArrayList<>();
 		public String firstPage = ""; // No Integer, because page numbers can also be roman!
 		public String issueNumber = "";

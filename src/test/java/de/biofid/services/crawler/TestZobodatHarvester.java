@@ -8,9 +8,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.junit.After;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -43,7 +47,7 @@ public class TestZobodatHarvester {
 		DummyConfigurator configurator = setup();
 		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
 				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
-		Document zobodatHtml = loadDocumentHtml("src/test/resources/zobodatIndex.html");
+		Document zobodatHtml = loadDocumentHtml("src/test/resources/html/zobodatIndex.html");
 
 		Elements itemList = zobodatHarvester.getItemListFromWebsite(zobodatHtml);
 		assertEquals(2, itemList.size());
@@ -137,7 +141,21 @@ public class TestZobodatHarvester {
 		assertTrue(createdFiles[0].exists());
 		assertTrue(createdFiles[1].exists());
 	}
-	
+
+	@Test
+	public void testGetCitationFromUrl() throws Exception {
+		DummyConfigurator configurator = setup();
+		String startingUrl = "https://www.zobodat.at/foo";
+		Document emptyCitationHtml = loadDocumentHtml("src/test/resources/html/emptyCitationContainer.html");
+
+		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
+				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
+		ZobodatHarvester zobodatHarvesterSpy = Mockito.spy(zobodatHarvester);
+		Mockito.doReturn(emptyCitationHtml).when(zobodatHarvesterSpy).getDocumentFromUrl(startingUrl);
+
+		Assertions.assertDoesNotThrow(() -> zobodatHarvesterSpy.getCitationFromUrl(new URL(startingUrl)));
+	}
+
 	private void areAllMetadataFieldsSerialized(JSONObject item) {
 		assertTrue(item.has(METADATA_PDF_URL));
 		assertTrue(item.has(METADATA_CITATION));
