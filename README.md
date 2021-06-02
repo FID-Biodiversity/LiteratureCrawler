@@ -5,7 +5,7 @@ This crawler was created as part of the [BIOfid](https://www.biofid.de/en/)-proj
 Given a configuration file `config/harvesting.yml`, the crawler downloads all demanded items (i.e. books, monographies, a journal issue) and store them locally. In the configuration file the base output directory is given. Subsequently, all included crawlers create their own subdirectory and within these, they create two directories `text` and `metadata`, which store all text files and the metadata as XML, respectively.
 
 ## Requirements
-The project needs OpenJDK 8+ and Maven 3.6+ (at least this is what it was build and tested with). At least the harvesting of items from the Botanical Garden of Madrid (via the BHLHarvester) will not work with Oracle Java 8, because of not available cipher suites for the TLS encryption.
+The project needs OpenJDK 11+ and Maven 3.6+. At least the harvesting of items from the Botanical Garden of Madrid (via the BHLHarvester) will not work with Oracle Java 8, because of not available cipher suites for the TLS encryption.
 
 ### Building
 To build the project simply call `mvn package`. This should give you a file `target/LiteratureCrawler.jar`. This you can run simply with 
@@ -13,6 +13,24 @@ To build the project simply call `mvn package`. This should give you a file `tar
 `java -jar target/LiteratureCrawler.jar`
 
 and the application will run.
+
+#### Building in Docker
+If you want or have to build a Docker image for the BIOfid Literature crawler, you can do this by:
+
+```
+docker build --tag literature-crawler:latest .
+```
+
+You should configure your harvesters BEFORE building, beause the config files are pushed to the image. However, there are ways to map the host config files to a container, using the `-v` parameter when calling `docker run`.
+
+To run the image in a container, call:
+
+```
+mkdir output
+docker run -v "$PWD"/output:/harvesting -v "$PWD"/logs:/usr/src/literature-crawler/logs c4b990054bee
+```
+
+This command will put all the content generated in the container, put into the folder `output` in your current directory.
 
 ### Testing
 To run all unit tests on a UNIX machine call `mvn test`.

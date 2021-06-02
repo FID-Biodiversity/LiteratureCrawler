@@ -64,7 +64,6 @@ public abstract class Harvester {
 
 	/***
 	 * This function can be called to start the harvesting of a specific internet source.
-	 * @throws CouldNotCreateDirectoryException
 	 */
 	public final void run() {
 		try {
@@ -116,7 +115,6 @@ public abstract class Harvester {
 	 * @param item An Item object to be filled.
 	 * @return A boolean to indicate if there are more items to come. If false, the stream stops and the function
 	 * is not called anymore.
-	 * @throws Exception 
 	 */
 	protected abstract boolean nextItem(Item item);
 	

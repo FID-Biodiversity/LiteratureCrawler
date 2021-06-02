@@ -5,7 +5,7 @@
 
 General:
    # The directory to write all the output
-   output-path: /tmp/productive
+   output-path: /harvesting
    
    # Whether to overwrite existing files (true) or not (false)
    overwrite: true
