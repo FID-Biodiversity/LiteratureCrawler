@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * @author https://www.biofid.de
  * @version 1.0
  */
-public abstract class Citation {
+public class Citation {
 	private static final Pattern pattern = Pattern.compile("^[0-9]{4}");
 	
 	private List<String> authors = new ArrayList<>();

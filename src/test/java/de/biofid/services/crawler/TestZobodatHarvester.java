@@ -1,5 +1,7 @@
 package de.biofid.services.crawler;
 
+import de.biofid.services.crawler.metadata.Citation;
+import de.biofid.services.crawler.metadata.MetadataElement;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,9 +15,7 @@ import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URL;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
@@ -65,85 +65,47 @@ public class TestZobodatHarvester {
 		
 		JSONObject item2 = itemMetadataJson.getJSONObject(0);
 		JSONObject item2Citation = item2.getJSONObject(METADATA_CITATION);
-		assertTrue(item2Citation.getJSONArray(CITATION_AUTHORS).length() == 1);
-		assertTrue(item2Citation.getJSONArray(CITATION_AUTHORS).toList().contains("Hugo Krüss"));
+		JSONArray authors = item2Citation.getJSONArray(CITATION_AUTHORS);
+		assertEquals(1, authors.length());
+		assertEquals( "Hugo Krüss", authors.getJSONObject(0).get("label"));
+		assertEquals(JSONObject.NULL, authors.getJSONObject(0).get("uri"));
 		assertEquals(1884, item2Citation.getInt(CITATION_YEAR));
 		assertEquals("Eine neue Form des Bunsen-Photometers", item2Citation.get(CITATION_TITLE));
-		assertEquals("Abhandlungen aus dem Gebiete der Naturwissenschaften Hamburg", item2Citation.get(CITATION_JOURNAL_NAME));
-		assertEquals("8", item2Citation.get(CITATION_ISSUE_NUMBER));
+		assertEquals("Abhandlungen aus dem Gebiete der Naturwissenschaften Hamburg", item2Citation.getJSONObject(CITATION_JOURNAL_NAME).get("label"));
+		assertEquals("8", item2Citation.getJSONObject(CITATION_ISSUE_NUMBER).get("label"));
 		assertEquals("1", item2Citation.get(CITATION_FIRST_PAGE));
 		assertEquals("8", item2Citation.get(CITATION_LAST_PAGE));
 		
 		JSONObject item4 = itemMetadataJson.getJSONObject(1);
 		JSONObject item4Citation = item4.getJSONObject(METADATA_CITATION);
-		assertTrue(item4Citation.getJSONArray(CITATION_AUTHORS).length() == 1);
-		assertTrue(item4Citation.getJSONArray(CITATION_AUTHORS).toList().contains("Heinrich Gustav Kirchenpauer"));
+		authors = item4Citation.getJSONArray(CITATION_AUTHORS);
+		assertEquals(1, authors.length());
+		assertEquals("Heinrich Gustav Kirchenpauer", authors.getJSONObject(0).get("label"));
+		assertEquals("https://www.zobodat.at/personen.php?id=144953", authors.getJSONObject(0).get("uri"));
 		assertEquals(1884, item4Citation.getInt(CITATION_YEAR));
 		assertEquals("Nordische Gatungen und Arten von Sertulariden", item4Citation.get(CITATION_TITLE));
-		assertEquals("Abhandlungen aus dem Gebiete der Naturwissenschaften Hamburg", item4Citation.get(CITATION_JOURNAL_NAME));
-		assertEquals("8", item4Citation.get(CITATION_ISSUE_NUMBER));
+		assertEquals("Abhandlungen aus dem Gebiete der Naturwissenschaften Hamburg", item4Citation.getJSONObject(CITATION_JOURNAL_NAME).get("label"));
+		assertEquals("8", item4Citation.getJSONObject(CITATION_ISSUE_NUMBER).get("label"));
 		assertEquals("1", item4Citation.get(CITATION_FIRST_PAGE));
 		assertEquals("56", item4Citation.get(CITATION_LAST_PAGE));
 	}
 	
 	@Test
 	public void testFetchingItemListsFromJournalOverviewSite() throws IOException {
+		// Uses data from https://www.zobodat.at/publikation_series.php?id=20987 ; Accessed 2021-06-10
 		DummyConfigurator configurator = setup();
-		String startingUrl = "https://www.zobodat.at/publikation_series.php?id=20987";
 		
 		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
 				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
-		Document journalSite = zobodatHarvester.getDocumentFromUrl(startingUrl);
-		Elements itemList = zobodatHarvester.getItemListFromWebsite(journalSite);
+		Document journalOverviewPage = loadDocumentHtml("src/test/resources/html/journalOverviewPage.html");
+
+		Elements itemList = zobodatHarvester.getItemListFromWebsite(journalOverviewPage);
+
 		assertEquals(7, itemList.size());
-		
-		zobodatHarvester.iterateItems(itemList);
-		assertEquals(80, zobodatHarvester.getMetadataListSize());
-		
-		JSONArray itemMetadataJson = zobodatHarvester.getMetadataListAsJSONArray();
-		assertEquals(80, itemMetadataJson.length());
-		
-		for (int i = 0; i < itemMetadataJson.length(); ++i) {
-			JSONObject item = itemMetadataJson.getJSONObject(i);
-			areAllMetadataFieldsSerialized(item);
-		}
-		
-		JSONObject item39 = itemMetadataJson.getJSONObject(39);
-		JSONObject item39Citation = item39.getJSONObject(METADATA_CITATION);
-		assertTrue(item39Citation.getJSONArray(CITATION_AUTHORS).length() == 1);
-		assertTrue(item39Citation.getJSONArray(CITATION_AUTHORS).toList().contains("Hans Roeckl"));
-		assertEquals(1922, item39Citation.getInt(CITATION_YEAR));
-		assertEquals("P.rotokoll der Hauptversamrnlurig am 14. August 1921 nachmittags 6 Uhr im Börsensaal (Nebenzimmer) zu Augsburg.", 
-				item39Citation.get(CITATION_TITLE));
-		assertEquals("Bericht des Vereins zum Schutze der Alpenpflanzen", item39Citation.get(CITATION_JOURNAL_NAME));
-		assertEquals("15_1922", item39Citation.get(CITATION_ISSUE_NUMBER));
-		assertEquals("14", item39Citation.get(CITATION_FIRST_PAGE));
-		assertEquals("20", item39Citation.get(CITATION_LAST_PAGE));
-	}
-	
-	@Test
-	public void testHarvesterRun() throws IOException {
-		DummyConfigurator configurator = setup();
-		String startingUrl = "https://www.zobodat.at/publikation_series.php?id=7392";
-		Path outputDirectoryPath = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + "/zobodat/text");
-		File[] createdFiles = {
-				outputDirectoryPath.resolve("145618.pdf").toFile(),
-				outputDirectoryPath.resolve("145616.pdf").toFile()
-		};
-		
-		configurator.addItemToArray(ZobodatHarvester.ZOBODAT_STRING, ITEM_ARRAY, startingUrl);
-		
-		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
-				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
-	
-		zobodatHarvester.run();
-		
-		assertTrue(createdFiles[0].exists());
-		assertTrue(createdFiles[1].exists());
 	}
 
 	@Test
-	public void testGetCitationFromUrl() throws Exception {
+	public void testGetEmptyCitationFromUrl() throws Exception {
 		DummyConfigurator configurator = setup();
 		String startingUrl = "https://www.zobodat.at/foo";
 		Document emptyCitationHtml = loadDocumentHtml("src/test/resources/html/emptyCitationContainer.html");
@@ -154,6 +116,31 @@ public class TestZobodatHarvester {
 		Mockito.doReturn(emptyCitationHtml).when(zobodatHarvesterSpy).getDocumentFromUrl(startingUrl);
 
 		Assertions.assertDoesNotThrow(() -> zobodatHarvesterSpy.getCitationFromUrl(new URL(startingUrl)));
+	}
+
+	@Test
+	public void testCitationGeneration() throws Exception {
+		DummyConfigurator configurator = setup();
+		String startingUrl = "https://www.zobodat.at/foo";
+		Document emptyCitationHtml = loadDocumentHtml("src/test/resources/html/fullCitationPage.html");
+
+		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
+				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
+		ZobodatHarvester zobodatHarvesterSpy = Mockito.spy(zobodatHarvester);
+		Mockito.doReturn(emptyCitationHtml).when(zobodatHarvesterSpy).getDocumentFromUrl(startingUrl);
+
+		Citation citation = zobodatHarvesterSpy.getCitationFromUrl(new URL(startingUrl));
+
+		assertEquals(7, citation.authors.size());
+		assertEquals(new MetadataElement("Herbert Zettel", "https://www.zobodat.at/personen.php?id=348"), citation.authors.get(0));
+		assertEquals(new MetadataElement("Herbert Christian Wagner", "https://www.zobodat.at/personen.php?id=53860"), citation.authors.get(1));
+		assertEquals(new MetadataElement("Reinhard Franz Seyfert", "https://www.zobodat.at/personen.php?id=9719"), citation.authors.get(6));
+		assertEquals("1", citation.firstPage);
+		assertEquals("20", citation.lastPage);
+		assertEquals("Aculeate Hymenoptera am GEO-Tag der Artenvielfalt 2009 in Pfaffstätten, Niederösterreich.", citation.title);
+		assertEquals(2009, citation.year);
+		assertEquals(new MetadataElement("Sabulosi", "https://www.zobodat.at/publikation_series.php?id=7392"), citation.journalName);
+		assertEquals(new MetadataElement("02", "https://www.zobodat.at/publikation_volumes.php?id=33586"), citation.issueNumber);
 	}
 
 	private void areAllMetadataFieldsSerialized(JSONObject item) {
@@ -193,8 +180,7 @@ public class TestZobodatHarvester {
 		testDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING).toFile();
 		didTestDirectoryExistBeforeTest = testDirectory.exists();
 		
-		DummyConfigurator configurator = getConfigurator();
-		return configurator;
+		return getConfigurator();
 	}
 
 	private Document loadDocumentHtml(String filePath) throws IOException {

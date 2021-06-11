@@ -1,5 +1,17 @@
 package de.biofid.services.crawler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.biofid.services.crawler.metadata.Citation;
+import de.biofid.services.crawler.metadata.Metadata;
+import de.biofid.services.crawler.zobodat.ZobodatCitationGenerator;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -8,16 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /***
  * A Harvester to crawl Zobodat.at literature.
@@ -31,30 +33,26 @@ public class ZobodatHarvester extends Harvester {
 	public static final String ZOBODAT_LITERATURE_BASE_URL = "https://www.zobodat.at/publikation_series.php";
 	public static final String ZOBODAT_STRING = "Zobodat";
 	
-	private static final String ATTRIBUTE_HREF = "href";
-	
-	private static final String HYPERLINK_REFERENCE_TO_AUTHOR = "personen.php";
-	private static final String HYPERLINK_REFERENCE_TO_PUBLICATION_NAME = "publikation_series.php";
-	private static final String HYPERLINK_REFERENCE_TO_PUBLICATION_VOLUME = "publikation_volumes.php";
-	
+	public static final String ATTRIBUTE_HREF = "href";
+
 	private static final String ITEM_COMPLETE_METADATA = "Item";
 	private static final String CONFIGURATION_ITEM_LIST = "items";
+
+	public static final Pattern REGEX_PATTERN_AUTHOR_AND_YEAR = Pattern.compile("^(.*?) ?\\(([0-9]{4})-?[0-9]{0,4}\\)");
+	public static final Pattern REGEX_PATTERN_ISSUE_NUMBER = Pattern.compile("– (.*?): ");
+	public static final Pattern REGEX_PATTERN_ITEM_ID_IN_ZOBODAT_URL = Pattern.compile("\\?id=([0-9]*)");
+	public static final Pattern REGEX_PATTERN_PAGES = Pattern.compile(": ([XI0-9]*?) - ([XI0-9]*?)\\.$");
+	public static final Pattern REGEX_PATTERN_TITLE_AND_JOURNAL_NAME = Pattern.compile("\\([0-9]{4}\\): (.*?) – (.*) – ");
 	
-	private static final Pattern REGEX_PATTERN_AUTHOR_AND_YEAR = Pattern.compile("^(.*?) ?\\(([0-9]{4})-?[0-9]{0,4}\\)");
-	private static final Pattern REGEX_PATTERN_ISSUE_NUMBER = Pattern.compile("– (.*?): ");
-	private static final Pattern REGEX_PATTERN_ITEM_ID_IN_ZOBODAT_URL = Pattern.compile("\\?id=([0-9]*)");
-	private static final Pattern REGEX_PATTERN_PAGES = Pattern.compile(": ([XI0-9]*?) - ([XI0-9]*?)\\.$");
-	private static final Pattern REGEX_PATTERN_TITLE_AND_JOURNAL_NAME = Pattern.compile("\\([0-9]{4}\\): (.*?) – (.*) – ");
+	public static final String SELECTOR_CITATION_CONTAINER = "#publikation_articles .text";
+	public static final String SELECTOR_CONTENT = "div.content";
+	public static final String SELECTOR_DIV = "div";
+	public static final String SELECTOR_HYPERLINKS = "a";
+	public static final String SELECTOR_ITEM_FROM_DOCUMENT_LIST = "ul.search-results-list li.result";
+	public static final String SELECTOR_ITEM_URL = ".content a.red";
+	public static final String SELECTOR_PUBLICATION_LINK = "a.publication-link";
 	
-	private static final String SELECTOR_CITATION_CONTAINER = "#publikation_articles .text";
-	private static final String SELECTOR_CONTENT = "div.content";
-	private static final String SELECTOR_DIV = "div";
-	private static final String SELECTOR_HYPERLINKS = "a";
-	private static final String SELECTOR_ITEM_FROM_DOCUMENT_LIST = "ul.search-results-list li.result";
-	private static final String SELECTOR_ITEM_URL = ".content a.red";
-	private static final String SELECTOR_PUBLICATION_LINK = "a.publication-link";
-	
-	private static final String ZOBODAT_URL = "https://www.zobodat.at";
+	public static final String ZOBODAT_URL = "https://www.zobodat.at";
 	
 	private boolean isMetadataCollected = false;
 	private Iterator<Metadata> itemMetadataIterator = null;
@@ -221,7 +219,7 @@ public class ZobodatHarvester extends Harvester {
 		
 		return ZOBODAT_URL + url;
 	}
-	
+
 	public Citation getCitationFromUrl(URL url) {
 		Citation citation;
 		try {
@@ -231,16 +229,16 @@ public class ZobodatHarvester extends Harvester {
 				throw new IOException("No citation container available");
 			}
 
-			citation = new Citation(citationContainer);
+			citation = ZobodatCitationGenerator.generateCitationFromHtmlElement(citationContainer);
 			logger.debug("Generated citation: " + citation.toString());
 		} catch (IOException e) {
 			logger.error("Could not collect citation site: " + url.toString());
 			citation = null;
 		}
-		
+
 		return citation;
 	}
-	
+
 	private URL getCitationUrl(Element item) {
 		Element contentContainer = item.selectFirst(SELECTOR_CONTENT);
 		Element citationLinkElement = contentContainer.select(SELECTOR_DIV).last();
@@ -254,13 +252,13 @@ public class ZobodatHarvester extends Harvester {
 			logger.error("Malformed Citation URL: " + citationUrlString);
 			citationUrl = null;
 		}
-		
+
 		return citationUrl;
 	}
-	
+
 	private long getItemIDFromUrl(URL url) {
 		Matcher itemIdMatcher = REGEX_PATTERN_ITEM_ID_IN_ZOBODAT_URL.matcher(url.toString());
-		
+
 		long itemID = -1;
 		if (itemIdMatcher.find()) {
 			 itemID = Long.parseLong(itemIdMatcher.group(1));
@@ -270,7 +268,7 @@ public class ZobodatHarvester extends Harvester {
 
 		return itemID;
 	}
-	
+
 	private URL getItemPdfUrl(Element item) {
 		Element pdfElement = item.selectFirst(SELECTOR_PUBLICATION_LINK);
 		if (pdfElement != null) {
@@ -284,13 +282,13 @@ public class ZobodatHarvester extends Harvester {
 				logger.error("Malformed PDF URL: " + pdfUrlString);
 				pdfUrl = null;
 			}
-			
+
 			return pdfUrl;
 		}
-		
+
 		return null;
 	}
-	
+
 	private JSONArray toJSONArray(Object obj) {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
@@ -299,108 +297,7 @@ public class ZobodatHarvester extends Harvester {
 		} catch (JsonProcessingException ex) {
 			logger.error("Could not convert item metadata list to JSON!");
 		}
-		
+
 		return null;
-	}
-	
-	public class Citation {
-		public List<String> authors = new ArrayList<>();
-		public String firstPage = ""; // No Integer, because page numbers can also be roman!
-		public String issueNumber = "";
-		public String journalName = "";
-		public String lastPage = "";
-		public String title = "";
-		public int year = -1;
-		
-		private final Pattern authorAndYearPattern = ZobodatHarvester.REGEX_PATTERN_AUTHOR_AND_YEAR;
-		private final Pattern issueNumberPattern = ZobodatHarvester.REGEX_PATTERN_ISSUE_NUMBER;
-		private final Pattern pagesPattern = ZobodatHarvester.REGEX_PATTERN_PAGES;
-		private final Pattern titleAndJournalNamePattern = ZobodatHarvester.REGEX_PATTERN_TITLE_AND_JOURNAL_NAME;
-		
-		public Citation(Element citationContainer) {
-			parseHyperlinkTextsToRespectiveClassField(citationContainer);
-			tryToFillEmptyClassFieldsFromContainerText(citationContainer);
-		}
-		
-		public void addAuthor(String author) {
-			if (!this.authors.contains(author)) {
-				author = author.trim();
-				this.authors.add(author);
-			}
-		}
-		
-		public void addAuthors(String[] authors) {
-			for (String author : authors) {
-				addAuthor(author);
-			}
-		}
-		
-		public String toString() {
-			return "Authors: " + authors.toString() + "\n Title: " + title + "\n Year: " + year + "\n"
-					+ " First Page: " + firstPage + "\n Last Page: " + lastPage + "\n Journal: " + journalName
-					+ "\n Issue number: " + issueNumber;			
-		}
-		
-		private boolean doesHyperlinkReferenceContainSubstring(Element hyperlink, String subString) {
-			return hyperlink.attr(ATTRIBUTE_HREF).contains(subString);
-		}
-		
-		private void parseHyperlinkTextsToRespectiveClassField(Element citationContainer) {
-			Elements links = citationContainer.select(SELECTOR_HYPERLINKS);
-			
-			for (Element link : links) {
-				if (doesHyperlinkReferenceContainSubstring(link, HYPERLINK_REFERENCE_TO_AUTHOR)) {
-					authors.add(link.text());
-				} else if (doesHyperlinkReferenceContainSubstring(link, HYPERLINK_REFERENCE_TO_PUBLICATION_NAME)) {
-					journalName = link.text();
-				} else if (doesHyperlinkReferenceContainSubstring(link, HYPERLINK_REFERENCE_TO_PUBLICATION_VOLUME)) {
-					issueNumber = link.text();
-				}
-			}
-		}
-		
-		private void tryToFillEmptyClassFieldsFromContainerText(Element citationContainer) {
-			String citationText = citationContainer.text();
-			
-			// It appears at Zobodat that a single author in the author list is linked, but the others not.
-			// Hence, we cannot simply check, if the author list is not empty!
-			Matcher authorAndYearMatcher = authorAndYearPattern.matcher(citationText);
-			while (authorAndYearMatcher.find()) {
-				String authorsString = authorAndYearMatcher.group(1);
-				addAuthors(authorsString.split(","));
-				year = Integer.parseInt(authorAndYearMatcher.group(2));
-			}
-			
-			if (issueNumber.isEmpty()) {
-				Matcher issueNumberMatcher = issueNumberPattern.matcher(citationText);
-				while (issueNumberMatcher.find()) {
-					issueNumber = issueNumberMatcher.group(1);
-				}
-			}
-			
-			Matcher pageMatcher = pagesPattern.matcher(citationText);
-			while (pageMatcher.find()) {
-				firstPage = pageMatcher.group(1);
-				lastPage = pageMatcher.group(2);
-			}
-			
-			Matcher titleAndJournalNameMatcher = titleAndJournalNamePattern.matcher(citationText);
-			while (titleAndJournalNameMatcher.find()) {
-				title = titleAndJournalNameMatcher.group(1);
-				journalName = titleAndJournalNameMatcher.group(2);
-			}	
-		}
-	}
-	
-	private class Metadata {
-		public Citation citation;
-		public long id;
-		public URL pdfUrl;
-		
-		public Metadata(long id, URL pdfUrl, Citation citation) {
-			this.pdfUrl = pdfUrl;
-			this.citation = citation;
-			this.id = id;
-		}
 	}
 }
