@@ -3,21 +3,34 @@ package de.biofid.services.crawler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.texttechnologylab.utilities.helper.RESTUtils.METHODS.GET;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.auth.AuthenticationException;
 import org.json.JSONObject;
+import org.json.XML;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.junit.After;
 import org.junit.Test;
 
 import de.biofid.services.crawler.BhlHarvester.ItemDoesNotExistException;
+import org.mockito.Mockito;
+import org.texttechnologylab.utilities.helper.RESTUtils;
+
+import javax.naming.event.ObjectChangeListener;
 
 public class TestBhlHarvester {
 	
@@ -33,11 +46,11 @@ public class TestBhlHarvester {
 	@Test
 	public void testGetAllCollections() throws IOException {
 		DummyConfigurator configurator = setup();
-		Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
-		BhlHarvester bhlHarvester = new BhlHarvester(
-				configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
-		Map<Long, JSONObject> collectionMap = bhlHarvester.getAllCollections();
-		assertFalse(collectionMap.isEmpty());
+		BhlHarvester bhlHarvesterSpy = prepareMockApiDataAndGetHarvesterSpy(configurator,
+				"src/test/resources/bhl/apiResponses/getCollections.json");
+
+		Map<Long, JSONObject> collectionMap = bhlHarvesterSpy.getAllCollections();
+		assertEquals(59, collectionMap.size());
 	}
 	
 	@Test
@@ -223,6 +236,26 @@ public class TestBhlHarvester {
 		didTestDirectoryExistBeforeTest = testDirectory.exists();
 		
 		return getConfigurator();
+	}
+
+	private JSONObject loadApiResponse(String filePath) throws IOException {
+		File testFilePath = new File(filePath);
+		ObjectMapper objectMapper = new ObjectMapper();
+		Map<String, Object> data = objectMapper.readValue(testFilePath, new TypeReference<Map<String,Object>>(){});
+
+		return new JSONObject(data);
+	}
+
+	private BhlHarvester prepareMockApiDataAndGetHarvesterSpy(HarvesterConfigurator configurator, String filePath) throws IOException {
+		Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+		BhlHarvester bhlHarvester = new BhlHarvester(
+				configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
+		JSONObject apiResponse = loadApiResponse(filePath);
+
+		BhlHarvester bhlHarvesterSpy = Mockito.spy(bhlHarvester);
+		Mockito.doReturn(apiResponse).when(bhlHarvesterSpy).getFromBhlApi(any());
+
+		return bhlHarvesterSpy;
 	}
 	
 	@After

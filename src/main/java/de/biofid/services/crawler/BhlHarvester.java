@@ -129,7 +129,7 @@ public class BhlHarvester extends Harvester {
         params.put(FORMAT, JSON_FORMAT);
         params.put(OPERATION, GET_COLLECTIONS);
 
-        JSONObject rObject = RESTUtils.getObjectFromRest(BHL_API_URL, GET, params);
+        JSONObject rObject = getFromBhlApi(params);
 
         if(rObject.has(REQUEST_STATUS) && rObject.getString(REQUEST_STATUS).equalsIgnoreCase(REQUEST_OK)) {
             JSONArray collectionsJSON = rObject.getJSONArray(REQUEST_RESULT);
@@ -183,7 +183,7 @@ public class BhlHarvester extends Harvester {
     	
     	JSONObject itemJson;
     	try {
-    		JSONObject apiResponse = RESTUtils.getObjectFromRest(BHL_API_URL, GET, params);
+    		JSONObject apiResponse = getFromBhlApi(params);
     		itemJson = getApiResultObject(apiResponse);	
     	} catch (ItemDoesNotExistException ex) {
     		throw new ItemDoesNotExistException("The item with the ID " + itemID + "could not be found!");
@@ -221,7 +221,7 @@ public class BhlHarvester extends Harvester {
             params.put(PAGE, currentPage);
 
             try {
-                JSONObject rObject = RESTUtils.getObjectFromRest(BHL_API_URL, GET, params);
+                JSONObject rObject = getFromBhlApi(params);
 
                 if (rObject.has(REQUEST_STATUS) && 
                 		rObject.getString(REQUEST_STATUS).equalsIgnoreCase(REQUEST_OK)) {
@@ -270,7 +270,7 @@ public class BhlHarvester extends Harvester {
         List<Long> itemsOfTitleList = new ArrayList<>();
         
         try {
-            JSONObject apiResponse = RESTUtils.getObjectFromRest(BHL_API_URL, GET, params);
+            JSONObject apiResponse = getFromBhlApi(params);
 
             if (apiResponse.has(REQUEST_STATUS) && 
             		apiResponse.getString(REQUEST_STATUS).equalsIgnoreCase(REQUEST_OK)) {
@@ -351,6 +351,10 @@ public class BhlHarvester extends Harvester {
     	logger.info("Processing items complete!");
 		return false;
     }
+
+    public JSONObject getFromBhlApi(Map<String, Object> apiParameters) {
+    	return RESTUtils.getObjectFromRest(BHL_API_URL, GET, apiParameters);
+	}
     
     private void addMetadataToItem(Item item, JSONObject itemMetadata) {
     	long itemID = itemMetadata.getLong(ITEM_ID);
