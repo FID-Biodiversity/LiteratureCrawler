@@ -1,36 +1,24 @@
 package de.biofid.services.crawler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.texttechnologylab.utilities.helper.RESTUtils.METHODS.GET;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.biofid.services.crawler.BhlHarvester.ItemDoesNotExistException;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.auth.AuthenticationException;
 import org.json.JSONObject;
-import org.json.XML;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.junit.After;
 import org.junit.Test;
-
-import de.biofid.services.crawler.BhlHarvester.ItemDoesNotExistException;
 import org.mockito.Mockito;
-import org.texttechnologylab.utilities.helper.RESTUtils;
 
-import javax.naming.event.ObjectChangeListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
 
 public class TestBhlHarvester {
 	
@@ -219,7 +207,7 @@ public class TestBhlHarvester {
 	}
 
 	private DummyConfigurator getConfigurator() throws IOException {
-		String configurationFilePathString = LiteratureHarvester.CONFIGURATION_FILE_PATH_STRING;
+		String configurationFilePathString = "src/test/resources/test-config.yml";
 		
 		DummyConfigurator configurator = new DummyConfigurator();
 		

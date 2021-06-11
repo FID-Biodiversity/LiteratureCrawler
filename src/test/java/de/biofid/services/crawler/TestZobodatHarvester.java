@@ -2,6 +2,7 @@ package de.biofid.services.crawler;
 
 import de.biofid.services.crawler.metadata.Citation;
 import de.biofid.services.crawler.metadata.MetadataElement;
+import de.biofid.services.crawler.zobodat.ZobodatHarvester;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;

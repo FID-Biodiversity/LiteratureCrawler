@@ -1,6 +1,5 @@
 package de.biofid.services.crawler.zobodat;
 
-import de.biofid.services.crawler.ZobodatHarvester;
 import de.biofid.services.crawler.metadata.Citation;
 import de.biofid.services.crawler.metadata.MetadataElement;
 import org.jsoup.nodes.Element;

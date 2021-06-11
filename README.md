@@ -27,7 +27,8 @@ To run the image in a container, call:
 
 ```
 mkdir output
-docker run -v "$PWD"/output:/harvesting -v "$PWD"/logs:/usr/src/literature-crawler/logs c4b990054bee
+mkdir logs
+docker run -v "$PWD"/output:/harvesting -v "$PWD"/logs:/usr/src/literature-crawler/logs --user $(id -u):$(id -g) literature-crawler:latest
 ```
 
 This command will put all the content generated in the container, put into the folder `output` in your current directory.

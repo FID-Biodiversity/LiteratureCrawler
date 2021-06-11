@@ -1,10 +1,12 @@
-package de.biofid.services.crawler;
+package de.biofid.services.crawler.zobodat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.biofid.services.crawler.Configuration;
+import de.biofid.services.crawler.Harvester;
+import de.biofid.services.crawler.Item;
 import de.biofid.services.crawler.metadata.Citation;
 import de.biofid.services.crawler.metadata.Metadata;
-import de.biofid.services.crawler.zobodat.ZobodatCitationGenerator;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -60,7 +62,7 @@ public class ZobodatHarvester extends Harvester {
 	
 	private List<Object> listOfItemsToDownload = new ArrayList<>();
 
-	public ZobodatHarvester(Configuration configuration) throws UnsetHarvesterBaseDirectoryException {
+	public ZobodatHarvester(Configuration configuration) throws IOException {
 		super(configuration);
 		
 		JSONObject jsonConfiguration = configuration.getHarvesterJsonConfiguration();
