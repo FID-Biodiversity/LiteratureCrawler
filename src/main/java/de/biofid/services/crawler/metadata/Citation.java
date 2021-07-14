@@ -7,8 +7,8 @@ import java.util.List;
 public class Citation {
     public List<MetadataElement> authors = new ArrayList<>();
     public String firstPage = ""; // No Integer, because page numbers can also be roman!
-    public MetadataElement issueNumber;
-    public MetadataElement journalName;
+    public MetadataElement issueNumber = new MetadataElement();
+    public MetadataElement journalName = new MetadataElement();
     public String lastPage = "";
     public String title = "";
     public int year = -1;

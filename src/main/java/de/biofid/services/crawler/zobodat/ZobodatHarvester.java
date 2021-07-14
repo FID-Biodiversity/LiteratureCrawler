@@ -41,7 +41,7 @@ public class ZobodatHarvester extends Harvester {
 	private static final String CONFIGURATION_ITEM_LIST = "items";
 
 	public static final Pattern REGEX_PATTERN_AUTHOR_AND_YEAR = Pattern.compile("^(.*?) ?\\(([0-9]{4})-?[0-9]{0,4}\\)");
-	public static final Pattern REGEX_PATTERN_ISSUE_NUMBER = Pattern.compile("– (.*?): ");
+	public static final Pattern REGEX_PATTERN_ISSUE_NUMBER = Pattern.compile("– ([^–]*?): ");
 	public static final Pattern REGEX_PATTERN_ITEM_ID_IN_ZOBODAT_URL = Pattern.compile("\\?id=([0-9]*)");
 	public static final Pattern REGEX_PATTERN_PAGES = Pattern.compile(": ([XI0-9]*?) - ([XI0-9]*?)\\.$");
 	public static final Pattern REGEX_PATTERN_TITLE_AND_JOURNAL_NAME = Pattern.compile("\\([0-9]{4}\\): (.*?) – (.*) – ");

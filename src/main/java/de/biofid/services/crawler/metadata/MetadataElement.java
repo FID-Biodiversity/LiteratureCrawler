@@ -7,6 +7,11 @@ public class MetadataElement {
     public String label;
     public URL uri;
 
+    public MetadataElement() {
+        this.label = "";
+        this.uri = null;
+    }
+
     public MetadataElement(String label, String uri) {
         this.label = label.trim();
         try {

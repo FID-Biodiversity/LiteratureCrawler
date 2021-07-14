@@ -144,6 +144,26 @@ public class TestZobodatHarvester {
 		assertEquals(new MetadataElement("02", "https://www.zobodat.at/publikation_volumes.php?id=33586"), citation.issueNumber);
 	}
 
+	@Test
+	public void testCitationGenerationWithNoLinks() throws Exception {
+		DummyConfigurator configurator = setup();
+		String startingUrl = "https://www.zobodat.at/foo";
+		Document noUrlsCitationHtml = loadDocumentHtml("src/test/resources/html/zobodat-citation-with-no-links.html");
+
+		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
+				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
+		ZobodatHarvester zobodatHarvesterSpy = Mockito.spy(zobodatHarvester);
+		Mockito.doReturn(noUrlsCitationHtml).when(zobodatHarvesterSpy).getDocumentFromUrl(startingUrl);
+
+		Citation citation = zobodatHarvesterSpy.getCitationFromUrl(new URL(startingUrl));
+
+		assertEquals(new MetadataElement("Christian Schrenk", null), citation.authors.get(0));
+		assertEquals(new MetadataElement("NS187", null), citation.issueNumber);
+
+		// This fails due to bad metadata by the provider!
+		//assertEquals(new MetadataElement("Kataloge des OÖ. Landesmuseums N.F.", null), citation.journalName);
+	}
+
 	private void areAllMetadataFieldsSerialized(JSONObject item) {
 		assertTrue(item.has(METADATA_PDF_URL));
 		assertTrue(item.has(METADATA_CITATION));

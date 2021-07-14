@@ -44,6 +44,6 @@ Harvesters:
      
         
 - Zobodat:
-     class: de.biofid.services.crawler.ZobodatHarvester
+     class: de.biofid.services.crawler.zobodat.ZobodatHarvester
      # This crawler is set up to download all texts from Zobodat, when no items are given.
    
