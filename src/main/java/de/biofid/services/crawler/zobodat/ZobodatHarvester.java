@@ -59,6 +59,7 @@ public class ZobodatHarvester extends Harvester {
 	private boolean isMetadataCollected = false;
 	private Iterator<Metadata> itemMetadataIterator = null;
 	private List<Metadata> itemMetadataList = new ArrayList<>();
+	private boolean downloadOnlyMetadata = false;
 	
 	private List<Object> listOfItemsToDownload = new ArrayList<>();
 

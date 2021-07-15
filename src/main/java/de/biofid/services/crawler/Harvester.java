@@ -75,7 +75,7 @@ public abstract class Harvester {
 		}
 		
 		while (true) {
-			Item item = new Item();
+			Item item = createNewEmptyItem();
 			
 			pause();
 			boolean next = nextItem(item);
@@ -86,6 +86,10 @@ public abstract class Harvester {
 				break;
 			}
 		}
+	}
+
+	public Item createNewEmptyItem() {
+		return new Item();
 	}
 	
 	public void setRequestDelayInMilliseconds(long millisecondsDelay) {
@@ -169,7 +173,9 @@ public abstract class Harvester {
 		
 		String outputPathString = outputPath.toString();
 		try {
-			item.writeTextFiles(outputPathString, overwriteExistingFiles);
+			if (!configuration.isOnlyMetadata()) {
+				item.writeTextFiles(outputPathString, overwriteExistingFiles);
+			}
 		} catch (DownloadFailedException ex) {
 			logger.error("The download of a text file from item ID {} failed!", item.getItemId());
 			logger.error(ex.getLocalizedMessage());

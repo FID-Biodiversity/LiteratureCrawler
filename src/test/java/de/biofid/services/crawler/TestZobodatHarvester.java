@@ -13,14 +13,17 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 
 public class TestZobodatHarvester {
@@ -42,6 +45,25 @@ public class TestZobodatHarvester {
 	
 	private boolean didTestDirectoryExistBeforeTest = true;
 	private File testDirectory = null;
+
+	@Test
+	public void testOnlyMetadataDownload() throws IOException, Item.DownloadFailedException, Item.UnsupportedOutputFormatException {
+		MockitoAnnotations.openMocks(this);
+		DummyConfigurator configurator = setup();
+		configurator.configurations.get(1).setOnlyMetadata(true);
+		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
+				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
+		ZobodatHarvester zobodatHarvesterSpy = Mockito.spy(zobodatHarvester);
+
+		Item itemMock = Mockito.mock(Item.class);
+		when(zobodatHarvesterSpy.createNewEmptyItem()).thenReturn(itemMock);
+		doReturn(true).doReturn(false).when(zobodatHarvesterSpy).nextItem(Mockito.any());
+
+		zobodatHarvesterSpy.run();
+
+		Mockito.verify(itemMock, Mockito.times(0)).writeTextFiles(Mockito.anyString(), Mockito.anyBoolean());
+		Mockito.verify(itemMock, Mockito.times(1)).writeMetadataFile(Mockito.anyString(), Mockito.any());
+	}
 
 	@Test
 	public void testFetchingItemListDirectly() throws IOException {

@@ -16,6 +16,7 @@ public class Configuration {
 	private String harvesterClassName;
 	private String harvesterName;
 	private boolean isOverwrittingEnabled = true;
+	private boolean onlyMetadata = false;
 	private JSONObject jsonConfiguration;
 	
 	public Configuration(Configuration conf) {
@@ -56,6 +57,10 @@ public class Configuration {
 	public boolean isOverwrittingEnabled() {
 		return isOverwrittingEnabled;
 	}
+
+	public boolean isOnlyMetadata() {
+		return onlyMetadata;
+	}
 	
 	public void setHarvesterApiKey(String apiKey) {
 		this.apiKey = apiKey;
@@ -67,5 +72,9 @@ public class Configuration {
 	
 	public void setRequestDelay(long delayInMilliseconds) {
 		this.delayBetweenRequestsInMilliseconds = delayInMilliseconds;
+	}
+
+	public void setOnlyMetadata(boolean onlyMetadata) {
+		this.onlyMetadata = onlyMetadata;
 	}
 }

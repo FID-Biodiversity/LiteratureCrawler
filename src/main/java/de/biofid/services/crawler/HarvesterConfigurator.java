@@ -34,7 +34,8 @@ public class HarvesterConfigurator {
 	private static final String HARVESTER_API_KEY = "api-key";
 	private static final String HARVESTER_CLASS_NAME = "class";
 	private static final String HARVESTER_CONFIGURATIONS_PARENT = "Harvesters";
-	
+	private static final String HARVESTER_METADATA_ONLY = "metadata-only";
+
 	private static final boolean OVERWRITTING_DEFAULT = true;
 	
 	protected Map<String, String> apiKeysForHarvesters = new HashMap<>();
@@ -122,12 +123,16 @@ public class HarvesterConfigurator {
 			if (jsonConfiguration.has(HARVESTER_API_KEY)) {
 				apiKeysForHarvesters.put(harvesterName, getApiKey(jsonConfiguration));
 			}
-			
+
 			Configuration config = new Configuration(harvesterName, harvesterClassName, jsonConfiguration);
 			config.setHarvesterApiKey(getApiKey(jsonConfiguration));
 			config.setOverwritting(getOverwrittingPolicyForHarvester(jsonConfiguration));
 			config.setRequestDelay(delayBetweenRequestsInMilliseconds);
-			
+
+			if (jsonConfiguration.has(HARVESTER_METADATA_ONLY)) {
+				config.setOnlyMetadata(jsonConfiguration.getBoolean(HARVESTER_METADATA_ONLY));
+			}
+
 			configurations.add(config);
 		}
 	}
