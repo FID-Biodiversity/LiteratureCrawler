@@ -8,7 +8,7 @@ General:
    output-path: /harvesting
    
    # Whether to overwrite existing files (true) or not (false)
-   overwrite: true
+   overwrite: false
    
    # Delay between requests to an API in milliseconds; Default: 0
    request-delay: 100
@@ -20,30 +20,30 @@ General:
 # that is contained in the configuration is up to the respective implementation and
 # will be handed to the respective Harvester.
 Harvesters:
-- BHL:
-     class: de.biofid.services.crawler.BhlHarvester
+        #- BHL:
+        #class: de.biofid.services.crawler.BhlHarvester
      
      # Providing the keyword "api-key" will cause the crawler to provide the respective
      # Harvester to use this key. You may choose to provide a file were the key is stored
      # as the only value or provide the key directly here instead.
-     api-key: config/bhl-api-key.txt
+     #api-key: config/bhl-api-key.txt
      
      # Overwrites the general overwriting rule for this harvester
-     overwrite: false
+     #overwrite: false
 
      # If only to download the metadata and not the text files
-     metadata-only: false
+     #metadata-only: false
      
      # Instead of a list you can provide a file that contains the items/titles in a list with one
      # item/title per line.
      
      # Single issues of e.g. a journal series.
-     items:
-        - 1234
-        - 5678
+     #items:
+     #   - 1234
+     #   - 5678
         
      # Titles are collections of items. E.g. a journal series.
-     titles: path/to/some/file.txt
+     #titles: path/to/some/file.txt
      
         
 - Zobodat:
