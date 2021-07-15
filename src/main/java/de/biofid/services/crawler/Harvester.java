@@ -76,6 +76,7 @@ public abstract class Harvester {
 		
 		while (true) {
 			Item item = createNewEmptyItem();
+			item.setToSave(this.configuration.isOnlyMetadata());
 			
 			pause();
 			boolean next = nextItem(item);
@@ -173,9 +174,7 @@ public abstract class Harvester {
 		
 		String outputPathString = outputPath.toString();
 		try {
-			if (!configuration.isOnlyMetadata()) {
-				item.writeTextFiles(outputPathString, overwriteExistingFiles);
-			}
+			item.writeTextFiles(outputPathString, overwriteExistingFiles);
 		} catch (DownloadFailedException ex) {
 			logger.error("The download of a text file from item ID {} failed!", item.getItemId());
 			logger.error(ex.getLocalizedMessage());

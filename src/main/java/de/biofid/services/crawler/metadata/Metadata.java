@@ -1,7 +1,5 @@
 package de.biofid.services.crawler.metadata;
 
-import de.biofid.services.crawler.metadata.Citation;
-
 import java.net.URL;
 
 public class Metadata {

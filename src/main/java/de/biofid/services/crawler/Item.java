@@ -10,10 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
@@ -94,6 +91,7 @@ public class Item {
 	private ArrayList<FileType> textFileTypes = new ArrayList<>();
 	private JSONObject itemMetadata = new JSONObject();
 	private HashSet<String> createdTextFiles = new HashSet<>();
+	private boolean saveData = true;
 
 	/***
 	 * Add a new key with an object to the metadata.
@@ -179,7 +177,11 @@ public class Item {
 	public JSONObject getItemMetadata() {
 		return itemMetadata;
 	}
-	
+
+	public boolean getSaveData() {
+		return saveData;
+	}
+
 	/***
 	 * The item id HAS to be set! From the ID all file names are derived!
 	 */
@@ -200,6 +202,10 @@ public class Item {
 	
 	public void setItemUrl(URL url) {
 		this.itemUrl = url;
+	}
+
+	public void setToSave(boolean toSave) {
+		this.saveData = toSave;
 	}
 	
 	public Path writeMetadataFile(String outputDirectory, FileType outputFormat) 
@@ -223,6 +229,11 @@ public class Item {
 	
 	public List<Path> writeTextFiles(String outputDirectory, boolean overwriteExistingFiles) 
 			throws DownloadFailedException {
+
+		if (!shallItemBeSaved()) {
+			return Collections.emptyList();
+		}
+
 		Path outputPath = Paths.get(outputDirectory, TEXT_OUTPUT_FOLDER_NAME);
 
 		ArrayList<Path> downloadedFiles = new ArrayList<>();
@@ -244,6 +255,10 @@ public class Item {
 		}
 		
 		return downloadedFiles;
+	}
+
+	public boolean shallItemBeSaved() {
+		return this.getSaveData();
 	}
 	
 	private void addObjectVariableDataToMetadata() {

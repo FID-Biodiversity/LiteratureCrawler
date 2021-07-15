@@ -1,27 +1,31 @@
 package de.biofid.services.crawler;
 
+import com.fasterxml.jackson.core.JsonParser;
 import de.biofid.services.crawler.metadata.Citation;
+import de.biofid.services.crawler.metadata.Metadata;
 import de.biofid.services.crawler.metadata.MetadataElement;
 import de.biofid.services.crawler.zobodat.ZobodatHarvester;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -45,25 +49,6 @@ public class TestZobodatHarvester {
 	
 	private boolean didTestDirectoryExistBeforeTest = true;
 	private File testDirectory = null;
-
-	@Test
-	public void testOnlyMetadataDownload() throws IOException, Item.DownloadFailedException, Item.UnsupportedOutputFormatException {
-		MockitoAnnotations.openMocks(this);
-		DummyConfigurator configurator = setup();
-		configurator.configurations.get(1).setOnlyMetadata(true);
-		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
-				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
-		ZobodatHarvester zobodatHarvesterSpy = Mockito.spy(zobodatHarvester);
-
-		Item itemMock = Mockito.mock(Item.class);
-		when(zobodatHarvesterSpy.createNewEmptyItem()).thenReturn(itemMock);
-		doReturn(true).doReturn(false).when(zobodatHarvesterSpy).nextItem(Mockito.any());
-
-		zobodatHarvesterSpy.run();
-
-		Mockito.verify(itemMock, Mockito.times(0)).writeTextFiles(Mockito.anyString(), Mockito.anyBoolean());
-		Mockito.verify(itemMock, Mockito.times(1)).writeMetadataFile(Mockito.anyString(), Mockito.any());
-	}
 
 	@Test
 	public void testFetchingItemListDirectly() throws IOException {
@@ -184,6 +169,27 @@ public class TestZobodatHarvester {
 
 		// This fails due to bad metadata by the provider!
 		//assertEquals(new MetadataElement("Kataloge des OÖ. Landesmuseums N.F.", null), citation.journalName);
+	}
+
+	@Test
+	public void testMakeItemDownloadable() throws IOException {
+		DummyConfigurator configurator = setup();
+		configurator.addItemToArray(ZobodatHarvester.ZOBODAT_STRING, "titles", "7392");
+
+		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
+				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
+
+		Item item = new Item();
+		item.setToSave(false);
+		Citation citation = new Citation();
+		citation.journalName = new MetadataElement("foo", "https://www.zobodat.at/publikation_series.php?id=7392");
+		Metadata metadata = new Metadata(1234, new URL("https://www.test.de"), citation);
+
+		assertFalse(item.getSaveData());
+
+		zobodatHarvester.addMetadataToItem(item, metadata);
+
+		assertTrue(item.getSaveData());
 	}
 
 	private void areAllMetadataFieldsSerialized(JSONObject item) {

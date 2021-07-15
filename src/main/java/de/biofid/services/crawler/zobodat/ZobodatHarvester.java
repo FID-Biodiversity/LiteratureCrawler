@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /***
  * A Harvester to crawl Zobodat.at literature.
@@ -39,6 +41,7 @@ public class ZobodatHarvester extends Harvester {
 
 	private static final String ITEM_COMPLETE_METADATA = "Item";
 	private static final String CONFIGURATION_ITEM_LIST = "items";
+	private static final String CONFIGURATION_TITLE_LIST = "titles";
 
 	public static final Pattern REGEX_PATTERN_AUTHOR_AND_YEAR = Pattern.compile("^(.*?) ?\\(([0-9]{4})-?[0-9]{0,4}\\)");
 	public static final Pattern REGEX_PATTERN_ISSUE_NUMBER = Pattern.compile("– ([^–]*?): ");
@@ -55,13 +58,14 @@ public class ZobodatHarvester extends Harvester {
 	public static final String SELECTOR_PUBLICATION_LINK = "a.publication-link";
 	
 	public static final String ZOBODAT_URL = "https://www.zobodat.at";
+	public static final String ZOBODAT_ARTICLE_BASE_URL = "https://www.zobodat.at/publikation_articles.php?id=";
+	public static final String ZOBODAT_TITLE_BASE_URL = "https://www.zobodat.at/publikation_series.php?id=";
 	
 	private boolean isMetadataCollected = false;
 	private Iterator<Metadata> itemMetadataIterator = null;
-	private List<Metadata> itemMetadataList = new ArrayList<>();
-	private boolean downloadOnlyMetadata = false;
+	private final List<Metadata> itemMetadataList = new ArrayList<>();
 	
-	private List<Object> listOfItemsToDownload = new ArrayList<>();
+	private List<Object> listOfItemsToProcess = new ArrayList<>();
 
 	public ZobodatHarvester(Configuration configuration) throws IOException {
 		super(configuration);
@@ -70,8 +74,18 @@ public class ZobodatHarvester extends Harvester {
 		
 		if (jsonConfiguration.has(CONFIGURATION_ITEM_LIST)) {
     		JSONArray itemListFromConfiguration = jsonConfiguration.getJSONArray(CONFIGURATION_ITEM_LIST);
-    		listOfItemsToDownload = itemListFromConfiguration.toList();
+    		listOfItemsToProcess = StreamSupport.stream(itemListFromConfiguration.spliterator(), false)
+					.map(itemId -> idStringToZobodatArticleUrl((String) itemId))
+					.collect(Collectors.toList());
     	}
+
+		if (jsonConfiguration.has(CONFIGURATION_TITLE_LIST)) {
+			JSONArray itemListFromConfiguration = jsonConfiguration.getJSONArray(CONFIGURATION_TITLE_LIST);
+			List<String> listOfTitles = StreamSupport.stream(itemListFromConfiguration.spliterator(), false)
+					.map(itemId -> idStringToZobodatTitleUrl((String) itemId))
+					.collect(Collectors.toList());
+			listOfItemsToProcess.addAll(listOfTitles);
+		}
 	}
 	
 	public Document getDocumentFromUrl(String url) throws IOException {
@@ -123,8 +137,8 @@ public class ZobodatHarvester extends Harvester {
 	public boolean nextItem(Item item) {
 		if (!isMetadataCollected) {
 			logger.info("Start crawling metadata!");
-			if (!listOfItemsToDownload.isEmpty()) {
-				for (Object obj : listOfItemsToDownload) {
+			if (!listOfItemsToProcess.isEmpty()) {
+				for (Object obj : listOfItemsToProcess) {
 					String itemUrl = (String) obj;
 					crawlUrlRecursively(itemUrl);
 				}
@@ -145,18 +159,43 @@ public class ZobodatHarvester extends Harvester {
 		
 		return true;
 	}
+
+	public String idStringToZobodatArticleUrl(String itemId) {
+		return ZOBODAT_ARTICLE_BASE_URL + itemId;
+	}
+
+	public String idStringToZobodatTitleUrl(String itemId) {
+		return ZOBODAT_TITLE_BASE_URL + itemId;
+	}
+
+	public boolean isItemInListOfPublicationsToStore(JSONObject itemMetadata) {
+		if (itemMetadata.isEmpty()) {
+			return false;
+		}
+
+		Object journalUrl = itemMetadata.getJSONObject("citation").getJSONObject("journalName").get("uri");
+
+		if (journalUrl != null) {
+			return listOfItemsToProcess.contains(journalUrl.toString());
+		} else {
+			return false;
+		}
+	}
 	
-	private void addMetadataToItem(Item item, Metadata itemMetadata) {
+	public void addMetadataToItem(Item item, Metadata itemMetadata) {
 		ObjectMapper mapper = new ObjectMapper();
-		String metdataJSONString;
+		String metadataJSONString;
 		try {
-			metdataJSONString = mapper.writeValueAsString(itemMetadata);
+			metadataJSONString = mapper.writeValueAsString(itemMetadata);
 		} catch (JsonProcessingException e) {
 			logger.error("Could not create metadata JSON from item " + item.getItemId());
 			return;
 		}
 		
-		JSONObject itemMetadataJSON = new JSONObject(metdataJSONString);
+		JSONObject itemMetadataJSON = new JSONObject(metadataJSONString);
+
+		boolean shallItemBeSaved = isItemInListOfPublicationsToStore(itemMetadataJSON);
+		item.setToSave(shallItemBeSaved);
 		
 		long itemID = Long.parseLong(itemMetadataJSON.remove("id").toString());
     	logger.debug("Processing Item ID " + itemID);
@@ -165,7 +204,7 @@ public class ZobodatHarvester extends Harvester {
 		item.addTextFileUrl((String) itemMetadataJSON.remove("pdfUrl"), Item.FileType.PDF);
 		item.addMetdata(ITEM_COMPLETE_METADATA, itemMetadataJSON);
 	}
-	
+
 	private int crawlUrlRecursively(String url) {
 		if (url.isEmpty()) {
 			return 0;

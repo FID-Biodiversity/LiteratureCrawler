@@ -19,6 +19,8 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -92,20 +94,20 @@ public class TestItem {
 		int itemID = 54321;
 		String dummySource = "Institute of Silly Walks";
 		String dummyItemUrl = "https://www.biofid.de";
-		
-		item = addMetadataExampleToItem(item);
+
+		addMetadataExampleToItem(item);
 		item.setItemId(itemID);
 		item.setDataSource(dummySource);
 		item.setItemUrl(dummyItemUrl);
-		
+
 		Path metadataFilePath = null;
 		item.writeMetadataFile(TEST_DIRECTORY, Item.FileType.XML);
-		
+
 		metadataFilePath = Paths.get(TEST_DIRECTORY + "/metadata/xml/" + itemID + ".xml");
 		assertTrue(metadataFilePath.toFile().exists());
-		
+
 		Document xmlDocument = readXmlFile(metadataFilePath);
-		
+
 		// Check if all Metadata are written to the file
 		assertEquals(1, xmlDocument.getElementsByTagName("Title").getLength());
 		assertEquals("Love in the Time of Corona",
@@ -113,13 +115,13 @@ public class TestItem {
 		assertEquals(1, xmlDocument.getElementsByTagName("Publication-year").getLength());
 		assertEquals("2020",
 				xmlDocument.getElementsByTagName("Publication-year").item(0).getTextContent());
-		
+
 		assertEquals(1, xmlDocument.getElementsByTagName("Authors").getLength());
 		NodeList authors = xmlDocument.getElementsByTagName("Author");
 		assertEquals(2, authors.getLength());
 		assertEquals("Fermina Daza", authors.item(0).getTextContent());
 		assertEquals("Florentino Arizas", authors.item(1).getTextContent());
-		
+
 		NodeList keywordList = xmlDocument.getElementsByTagName("Keywords");
 		assertEquals(1, keywordList.getLength());
 		NodeList keywords = keywordList.item(0).getChildNodes();
@@ -127,32 +129,32 @@ public class TestItem {
 		assertEquals("Drama", keywords.item(0).getTextContent());
 		assertEquals("Crisis", keywords.item(1).getTextContent());
 		assertEquals("Toilet Paper", keywords.item(2).getTextContent());
-		
-		assertEquals(Integer.toString(itemID), 
+
+		assertEquals(Integer.toString(itemID),
 				xmlDocument.getElementsByTagName(Item.METADATA_ITEM_ID_STRING).item(0).getTextContent());
-		assertEquals(dummySource, 
+		assertEquals(dummySource,
 				xmlDocument.getElementsByTagName(Item.METADATA_ITEM_SOURCE_STRING).item(0).getTextContent());
-		
+
 		NodeList textUrlList = xmlDocument.getElementsByTagName(Item.METADATA_ITEM_TEXT_URLS_PARENT_STRING);
 		assertEquals(1, textUrlList.getLength());
-		
+
 		String[] expectedTextUrls = {
 				"https://www.biofid.de/item/1234",
 				"https://www.biofid.de/item/9875.txt",
 				"https://www.biofid.de/item/6254234",
 				"https://www.biofid.de/item/296324.gz"
 		};
-		
+
 		Item.FileType[] expectedTextFileTypes = {
 				Item.FileType.PDF,
 				Item.FileType.TXT,
 				Item.FileType.PDF,
 				Item.FileType.ABBYY
 		};
-		
+
 		NodeList textUrlChildNodes = textUrlList.item(0).getChildNodes();
 		assertEquals(4, textUrlChildNodes.getLength());
-		
+
 		for (int i = 0; i < textUrlChildNodes.getLength(); ++i) {
 			Node node = textUrlChildNodes.item(i);
 			assertEquals(expectedTextFileTypes[i].toString(),
@@ -188,6 +190,23 @@ public class TestItem {
 		assertTrue(createdFilePath.toFile().exists());
 		
 		createdTextFiles.add(createdFilePath);
+	}
+
+	@Test
+	public void testNoTextDownload() throws DownloadFailedException {
+		Item item = new Item();
+		int itemID = 54321;
+		String dummySource = "Institute of Silly Walks";
+		String dummyItemUrl = "https://www.biofid.de";
+
+		addMetadataExampleToItem(item);
+		item.setItemId(itemID);
+		item.setDataSource(dummySource);
+		item.setItemUrl(dummyItemUrl);
+		item.setToSave(false);
+
+		List<Path> downloadedFilePaths = item.writeTextFiles(TEST_DIRECTORY, false);
+		assertTrue(downloadedFilePaths.isEmpty());
 	}
 	
 	@Before
