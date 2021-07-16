@@ -16,6 +16,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
+import org.json.XML;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -207,6 +208,16 @@ public class TestItem {
 
 		List<Path> downloadedFilePaths = item.writeTextFiles(TEST_DIRECTORY, false);
 		assertTrue(downloadedFilePaths.isEmpty());
+	}
+
+	@Test
+	public void testItemSerialization() throws UnsupportedOutputFormatException {
+		Item item = new Item();
+		addMetadataExampleToItem(item);
+
+		String stringifiedItem = item.getMetadataStringForFileType(Item.FileType.XML);
+		assertTrue(stringifiedItem.contains("<Authors>"));
+		assertTrue(stringifiedItem.contains("<Author>"));
 	}
 	
 	@Before

@@ -8,6 +8,7 @@ import de.biofid.services.crawler.Item;
 import de.biofid.services.crawler.metadata.Citation;
 import de.biofid.services.crawler.metadata.Metadata;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -157,6 +158,7 @@ public class ZobodatHarvester extends Harvester {
 		}
 		
 		if (itemMetadataIterator.hasNext()) {
+			logger.debug("Getting next metadata!");
 			Metadata itemMetadata = itemMetadataIterator.next();
 			addMetadataToItem(item, itemMetadata);
 		} else {
@@ -176,20 +178,6 @@ public class ZobodatHarvester extends Harvester {
 
 	public String idToZobodatTitleUrl(String itemId) {
 		return ZOBODAT_TITLE_BASE_URL + itemId;
-	}
-
-	public boolean isItemInListOfPublicationsToStore(JSONObject itemMetadata) {
-		if (itemMetadata.isEmpty()) {
-			return false;
-		}
-
-		Object journalUrl = itemMetadata.getJSONObject("citation").getJSONObject("journalName").get("uri");
-
-		if (journalUrl != null) {
-			return listOfItemsToProcess.contains(journalUrl.toString());
-		} else {
-			return false;
-		}
 	}
 	
 	public void addMetadataToItem(Item item, Metadata itemMetadata) {
@@ -213,6 +201,25 @@ public class ZobodatHarvester extends Harvester {
 		item.setItemId(itemID);
 		item.addTextFileUrl((String) itemMetadataJSON.remove("pdfUrl"), Item.FileType.PDF);
 		item.addMetdata(ITEM_COMPLETE_METADATA, itemMetadataJSON);
+	}
+
+	public boolean isItemInListOfPublicationsToStore(JSONObject itemMetadata) {
+		if (itemMetadata.isEmpty()) {
+			return false;
+		}
+
+		Object journalUrl = null;
+		try {
+			journalUrl = itemMetadata.getJSONObject("citation").getJSONObject("journalName").get("uri");
+		} catch (JSONException ex) {
+			logger.info("There was an issue with processing this data: " + itemMetadata);
+		}
+
+		if (journalUrl != null) {
+			return listOfItemsToProcess.contains(journalUrl.toString());
+		} else {
+			return false;
+		}
 	}
 
 	private int crawlUrlRecursively(String url) {
