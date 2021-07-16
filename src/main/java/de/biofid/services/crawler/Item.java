@@ -257,6 +257,20 @@ public class Item {
 		return downloadedFiles;
 	}
 
+	public String getMetadataStringForFileType(FileType outputFormat)
+			throws UnsupportedOutputFormatException {
+		switch (outputFormat) {
+			case XML:
+				return XML.toString(itemMetadata, METADATA_ROOT_NAME);
+			case JSON:
+				return itemMetadata.toString(JSON_N_SPACES_FOR_INDENTATION);
+			default:
+				throw new UnsupportedOutputFormatException("The given FileType '" + outputFormat.toString() +
+						"' is not supported! Please choose: XML or JSON .");
+
+		}
+	}
+
 	public boolean shallItemBeSaved() {
 		return this.getSaveData();
 	}
@@ -301,20 +315,6 @@ public class Item {
 		}
 
 		return fileName;
-	}
-	
-	private String getMetadataStringForFileType(FileType outputFormat) 
-			throws UnsupportedOutputFormatException {
-		switch (outputFormat) {
-			case XML:
-				return XML.toString(itemMetadata, METADATA_ROOT_NAME);
-			case JSON: 
-				return itemMetadata.toString(JSON_N_SPACES_FOR_INDENTATION);
-			default: 
-				throw new UnsupportedOutputFormatException("The given FileType '" + outputFormat.toString() +
-						"' is not supported! Please choose: XML or JSON .");
-			
-		}
 	}
 	
 	private boolean checkFileNameForDuplication(String fileName) {

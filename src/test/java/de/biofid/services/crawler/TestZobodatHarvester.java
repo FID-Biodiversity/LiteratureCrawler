@@ -1,6 +1,5 @@
 package de.biofid.services.crawler;
 
-import com.fasterxml.jackson.core.JsonParser;
 import de.biofid.services.crawler.metadata.Citation;
 import de.biofid.services.crawler.metadata.Metadata;
 import de.biofid.services.crawler.metadata.MetadataElement;
@@ -8,26 +7,20 @@ import de.biofid.services.crawler.zobodat.ZobodatHarvester;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
 
 
 public class TestZobodatHarvester {
