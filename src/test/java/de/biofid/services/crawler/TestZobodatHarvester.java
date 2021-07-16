@@ -51,6 +51,23 @@ public class TestZobodatHarvester {
 	private File testDirectory = null;
 
 	@Test
+	public void testZobodatInstantiation() {
+		JSONObject parametersFromConfigFile = new JSONObject("{\"metadata-only\": true, \"titles\": [1234, 6789]}");
+
+		Configuration configuration = new Configuration(
+				"Zobodat",
+				"de.biofid.services.crawler.zobodat.ZobodatHarvester",
+				parametersFromConfigFile
+		);
+
+		LiteratureHarvester literatureHarvester = new LiteratureHarvester();
+		Harvester instantiatedHarvester = literatureHarvester.instantiateHarvester(configuration);
+
+		assertNotNull(instantiatedHarvester);
+		assertTrue(instantiatedHarvester instanceof ZobodatHarvester);
+	}
+
+	@Test
 	public void testFetchingItemListDirectly() throws IOException {
 		DummyConfigurator configurator = setup();
 		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(

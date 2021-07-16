@@ -80,9 +80,9 @@ public class ZobodatHarvester extends Harvester {
     	}
 
 		if (jsonConfiguration.has(CONFIGURATION_TITLE_LIST)) {
-			JSONArray itemListFromConfiguration = jsonConfiguration.getJSONArray(CONFIGURATION_TITLE_LIST);
-			List<String> listOfTitles = StreamSupport.stream(itemListFromConfiguration.spliterator(), false)
-					.map(itemId -> idStringToZobodatTitleUrl((String) itemId))
+			JSONArray titleListFromConfiguration = jsonConfiguration.getJSONArray(CONFIGURATION_TITLE_LIST);
+			List<Object> listOfTitles = StreamSupport.stream(titleListFromConfiguration.spliterator(), false)
+					.map(itemId -> (Object) idToZobodatTitleUrl((int) itemId))
 					.collect(Collectors.toList());
 			listOfItemsToProcess.addAll(listOfTitles);
 		}
@@ -164,7 +164,11 @@ public class ZobodatHarvester extends Harvester {
 		return ZOBODAT_ARTICLE_BASE_URL + itemId;
 	}
 
-	public String idStringToZobodatTitleUrl(String itemId) {
+	public String idToZobodatTitleUrl(int itemId) {
+		return idToZobodatTitleUrl(Integer.toString(itemId));
+	}
+
+	public String idToZobodatTitleUrl(String itemId) {
 		return ZOBODAT_TITLE_BASE_URL + itemId;
 	}
 
