@@ -53,5 +53,9 @@ Harvesters:
     class: de.biofid.services.crawler.zobodat.ZobodatHarvester
     metadata-only: true
 
+    # If this is true, all items in Zobodat will be crawled and the metadata is downloaded.
+    # If given with an item or title list, the text files of the given items will be downloaded.
+    crawl-all-items: true
+
 
    

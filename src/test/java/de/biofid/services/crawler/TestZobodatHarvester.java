@@ -133,7 +133,7 @@ public class TestZobodatHarvester {
 	public void testGetEmptyCitationFromUrl() throws Exception {
 		DummyConfigurator configurator = setup();
 		String startingUrl = "https://www.zobodat.at/foo";
-		Document emptyCitationHtml = loadDocumentHtml("src/test/resources/html/emptyCitationContainer.html");
+		Document emptyCitationHtml = loadDocumentHtml("src/test/resources/html/zobodat/citations/emptyCitationContainer.html");
 
 		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
 				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
@@ -147,7 +147,7 @@ public class TestZobodatHarvester {
 	public void testCitationGeneration() throws Exception {
 		DummyConfigurator configurator = setup();
 		String startingUrl = "https://www.zobodat.at/foo";
-		Document emptyCitationHtml = loadDocumentHtml("src/test/resources/html/fullCitationPage.html");
+		Document emptyCitationHtml = loadDocumentHtml("src/test/resources/html/zobodat/citations/fullCitationPage.html");
 
 		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
 				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
@@ -170,16 +170,7 @@ public class TestZobodatHarvester {
 
 	@Test
 	public void testCitationGenerationWithNoLinks() throws Exception {
-		DummyConfigurator configurator = setup();
-		String startingUrl = "https://www.zobodat.at/foo";
-		Document noUrlsCitationHtml = loadDocumentHtml("src/test/resources/html/zobodat-citation-with-no-links.html");
-
-		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
-				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
-		ZobodatHarvester zobodatHarvesterSpy = Mockito.spy(zobodatHarvester);
-		Mockito.doReturn(noUrlsCitationHtml).when(zobodatHarvesterSpy).getDocumentFromUrl(startingUrl);
-
-		Citation citation = zobodatHarvesterSpy.getCitationFromUrl(new URL(startingUrl));
+		Citation citation = generateCitationFromZobodatHtmlFile("src/test/resources/html/zobodat/citations/zobodat-citation-with-no-links.html");
 
 		assertEquals(new MetadataElement("Christian Schrenk", null), citation.authors.get(0));
 		assertEquals(new MetadataElement("NS187", null), citation.issueNumber);
@@ -191,7 +182,7 @@ public class TestZobodatHarvester {
 	@Test
 	public void testMakeItemDownloadable() throws IOException {
 		DummyConfigurator configurator = setup();
-		configurator.addItemToArray(ZobodatHarvester.ZOBODAT_STRING, "titles", "7392");
+		configurator.addItemToArray(ZobodatHarvester.ZOBODAT_STRING, "titles", 7392);
 
 		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
 				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
@@ -207,6 +198,26 @@ public class TestZobodatHarvester {
 		zobodatHarvester.addMetadataToItem(item, metadata);
 
 		assertTrue(item.getSaveData());
+	}
+
+	@Test
+	public void testRecognizeJournalUrl() throws IOException {
+		Citation citation = generateCitationFromZobodatHtmlFile("src/test/resources/html/zobodat/citations/another-citation.html");
+
+		assertEquals(new URL("https://www.zobodat.at/publikation_series.php?id=20832"), citation.journalName.uri);
+	}
+
+	private Citation generateCitationFromZobodatHtmlFile(String filePath) throws IOException {
+		DummyConfigurator configurator = setup();
+		String startingUrl = "https://www.zobodat.at/foo";
+		Document noUrlsCitationHtml = loadDocumentHtml(filePath);
+
+		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
+				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
+		ZobodatHarvester zobodatHarvesterSpy = Mockito.spy(zobodatHarvester);
+		Mockito.doReturn(noUrlsCitationHtml).when(zobodatHarvesterSpy).getDocumentFromUrl(startingUrl);
+
+		return zobodatHarvesterSpy.getCitationFromUrl(new URL(startingUrl));
 	}
 
 	private void areAllMetadataFieldsSerialized(JSONObject item) {

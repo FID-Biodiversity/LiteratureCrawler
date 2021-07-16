@@ -42,6 +42,7 @@ public class ZobodatHarvester extends Harvester {
 	private static final String ITEM_COMPLETE_METADATA = "Item";
 	private static final String CONFIGURATION_ITEM_LIST = "items";
 	private static final String CONFIGURATION_TITLE_LIST = "titles";
+	private static final String CONFIGURATION_CRAWL_ALL_ITEMS = "crawl-all-items";
 
 	public static final Pattern REGEX_PATTERN_AUTHOR_AND_YEAR = Pattern.compile("^(.*?) ?\\(([0-9]{4})-?[0-9]{0,4}\\)");
 	public static final Pattern REGEX_PATTERN_ISSUE_NUMBER = Pattern.compile("– ([^–]*?): ");
@@ -64,6 +65,7 @@ public class ZobodatHarvester extends Harvester {
 	private boolean isMetadataCollected = false;
 	private Iterator<Metadata> itemMetadataIterator = null;
 	private final List<Metadata> itemMetadataList = new ArrayList<>();
+	private boolean crawlAllItems = true;
 	
 	private List<Object> listOfItemsToProcess = new ArrayList<>();
 
@@ -86,6 +88,8 @@ public class ZobodatHarvester extends Harvester {
 					.collect(Collectors.toList());
 			listOfItemsToProcess.addAll(listOfTitles);
 		}
+
+		crawlAllItems = jsonConfiguration.optBoolean(CONFIGURATION_CRAWL_ALL_ITEMS, true);
 	}
 	
 	public Document getDocumentFromUrl(String url) throws IOException {
@@ -137,12 +141,14 @@ public class ZobodatHarvester extends Harvester {
 	public boolean nextItem(Item item) {
 		if (!isMetadataCollected) {
 			logger.info("Start crawling metadata!");
-			if (!listOfItemsToProcess.isEmpty()) {
+			if (!listOfItemsToProcess.isEmpty() && !crawlAllItems) {
+				logger.info("Crawling the following item ID list: " + listOfItemsToProcess);
 				for (Object obj : listOfItemsToProcess) {
 					String itemUrl = (String) obj;
 					crawlUrlRecursively(itemUrl);
 				}
 			} else {
+				logger.info("Start crawling all of Zobodat!");
 				crawlUrlRecursively(ZOBODAT_LITERATURE_BASE_URL);
 			}
 			isMetadataCollected = true;
@@ -276,9 +282,9 @@ public class ZobodatHarvester extends Harvester {
 			}
 
 			citation = ZobodatCitationGenerator.generateCitationFromHtmlElement(citationContainer);
-			logger.debug("Generated citation: " + citation.toString());
+			logger.debug("Generated citation: " + citation);
 		} catch (IOException e) {
-			logger.error("Could not collect citation site: " + url.toString());
+			logger.error("Could not collect citation site: " + url);
 			citation = null;
 		}
 

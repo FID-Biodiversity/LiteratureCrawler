@@ -77,16 +77,24 @@ public class ZobodatCitationGenerator {
             }
         }
 
-        Matcher pageMatcher = pagesPattern.matcher(citationText);
-        while (pageMatcher.find()) {
-            citation.firstPage = pageMatcher.group(1);
-            citation.lastPage = pageMatcher.group(2);
+        if (citation.firstPage.isEmpty()) {
+            Matcher pageMatcher = pagesPattern.matcher(citationText);
+            while (pageMatcher.find()) {
+                citation.firstPage = pageMatcher.group(1);
+                citation.lastPage = pageMatcher.group(2);
+            }
         }
 
-        Matcher titleAndJournalNameMatcher = titleAndJournalNamePattern.matcher(citationText);
-        while (titleAndJournalNameMatcher.find()) {
-            citation.title = titleAndJournalNameMatcher.group(1);
-            citation.journalName = createMetadataElementFromHtmlElement(titleAndJournalNameMatcher.group(2));
+        if (citation.title.isEmpty() || citation.journalName.isEmpty()) {
+            Matcher titleAndJournalNameMatcher = titleAndJournalNamePattern.matcher(citationText);
+            while (titleAndJournalNameMatcher.find()) {
+                if (citation.title.isEmpty()) {
+                    citation.title = titleAndJournalNameMatcher.group(1);
+                }
+                if (citation.journalName.isEmpty()) {
+                    citation.journalName = createMetadataElementFromHtmlElement(titleAndJournalNameMatcher.group(2));
+                }
+            }
         }
     }
 
