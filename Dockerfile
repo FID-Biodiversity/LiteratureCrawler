@@ -12,7 +12,7 @@ WORKDIR /usr/src/literature-crawler
 
 COPY . .
 
-RUN mvn package -DskipTests
+RUN mvn package -Dcom.sun.security.enableAIAcaIssuers=true
 
 COPY config/harvesting.yml config/
 

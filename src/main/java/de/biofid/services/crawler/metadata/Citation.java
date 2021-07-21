@@ -12,11 +12,11 @@ public class Citation {
     public String lastPage = "";
     public String title = "";
     public int year = -1;
-    public String originalDataElement = "";
+    public String url = "";
 
     public String toString() {
         return "Authors: " + authors.toString() + "\n Title: " + title + "\n Year: " + year + "\n"
                 + " First Page: " + firstPage + "\n Last Page: " + lastPage + "\n Journal: " + journalName
-                + "\n Issue number: " + issueNumber;
+                + "\n Issue number: " + issueNumber + "\n URL: " + url;
     }
 }

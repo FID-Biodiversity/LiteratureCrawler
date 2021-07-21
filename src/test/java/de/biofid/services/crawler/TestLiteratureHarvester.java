@@ -1,12 +1,12 @@
 package de.biofid.services.crawler;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 public class TestLiteratureHarvester {
 	
@@ -24,12 +24,12 @@ public class TestLiteratureHarvester {
 		assertEquals("BHL", instantiatedHarvester.getFolderName());
 	}
 	
-	@Before
+	@BeforeEach
 	public void setup() throws IOException {
 		configurator = getConfigurator();
 	}
 	
-	@After
+	@AfterEach
 	public void cleanup() {
 		configurator = null;
 	}

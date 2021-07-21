@@ -3,13 +3,9 @@ package de.biofid.services.crawler;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 import org.apache.commons.io.FilenameUtils;
@@ -91,7 +87,7 @@ public class Item {
 	private ArrayList<FileType> textFileTypes = new ArrayList<>();
 	private JSONObject itemMetadata = new JSONObject();
 	private HashSet<String> createdTextFiles = new HashSet<>();
-	private boolean saveData = true;
+	private boolean saveMetadataOnly = true;
 
 	/***
 	 * Add a new key with an object to the metadata.
@@ -178,8 +174,8 @@ public class Item {
 		return itemMetadata;
 	}
 
-	public boolean getSaveData() {
-		return saveData;
+	public boolean getSaveMetadataOnly() {
+		return saveMetadataOnly;
 	}
 
 	/***
@@ -204,8 +200,8 @@ public class Item {
 		this.itemUrl = url;
 	}
 
-	public void setToSave(boolean toSave) {
-		this.saveData = toSave;
+	public void setSaveMetadataOnly(boolean toSave) {
+		this.saveMetadataOnly = toSave;
 	}
 	
 	public Path writeMetadataFile(String outputDirectory, FileType outputFormat) 
@@ -230,7 +226,7 @@ public class Item {
 	public List<Path> writeTextFiles(String outputDirectory, boolean overwriteExistingFiles) 
 			throws DownloadFailedException {
 
-		if (!shallItemBeSaved()) {
+		if (shallOnlyMetadataBeSaved()) {
 			return Collections.emptyList();
 		}
 
@@ -271,8 +267,8 @@ public class Item {
 		}
 	}
 
-	public boolean shallItemBeSaved() {
-		return this.getSaveData();
+	public boolean shallOnlyMetadataBeSaved() {
+		return this.getSaveMetadataOnly();
 	}
 	
 	private void addObjectVariableDataToMetadata() {

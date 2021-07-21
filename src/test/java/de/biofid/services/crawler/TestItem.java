@@ -1,8 +1,20 @@
 package de.biofid.services.crawler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import de.biofid.services.crawler.Item.DownloadFailedException;
+import de.biofid.services.crawler.Item.UnsupportedOutputFormatException;
+import org.apache.commons.io.FileUtils;
+import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -10,25 +22,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.commons.io.FileUtils;
-import org.json.JSONObject;
-import org.json.XML;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import de.biofid.services.crawler.Item.DownloadFailedException;
-import de.biofid.services.crawler.Item.UnsupportedOutputFormatException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestItem {
 	
@@ -36,10 +31,11 @@ public class TestItem {
 	private static final Path testDirectoryPath = Paths.get(TEST_DIRECTORY);
 	private boolean didTestDirectoryExistsBeforeTest = false;
 	private List<Path> createdTextFiles = new ArrayList<Path>();
+
+	private Item item;
 	
 	@Test
 	public void testSingleFileTextDownload() throws DownloadFailedException {
-		Item item = new Item();
 		int itemId = 122536;
 		item.addTextFileUrl("https://www.biodiversitylibrary.org/itempdf/" + itemId, Item.FileType.PDF);
 		item.setItemId(itemId);
@@ -54,7 +50,6 @@ public class TestItem {
 
 	@Test
 	public void testMultiFileTextDownload() throws DownloadFailedException {
-		Item item = new Item();
 		int itemId = 12345;
 		// Examples taken from https://www.biodiversitylibrary.org/browse/collection/HistoryOfCats
 		item.addTextFileUrl("https://www.biodiversitylibrary.org/itempdf/93597", Item.FileType.PDF);
@@ -66,7 +61,7 @@ public class TestItem {
 		
 		boolean overwriteExistingFiles = true;
 		createdTextFiles = item.writeTextFiles(TEST_DIRECTORY, overwriteExistingFiles);
-		assertTrue(createdTextFiles.toArray().length == 4);
+		assertEquals(4, createdTextFiles.toArray().length);
 		
 		String[] fileNameComparisonArray = {
 				itemId + ".pdf", itemId + ".txt", itemId + "-1.pdf", itemId + ".gz"
@@ -91,7 +86,6 @@ public class TestItem {
 												ParserConfigurationException, SAXException, 
 												IOException {
 		// TODO: Add test for XML elements. They are not working yet.
-		Item item = new Item();
 		int itemID = 54321;
 		String dummySource = "Institute of Silly Walks";
 		String dummyItemUrl = "https://www.biofid.de";
@@ -167,7 +161,6 @@ public class TestItem {
 	
 	@Test
 	public void testOverwriteAgenda() throws DownloadFailedException, IOException {
-		Item item = new Item();
 		int itemId = 12345;
 		// Examples taken from https://www.biodiversitylibrary.org/browse/collection/HistoryOfCats
 		item.addTextFileUrl("https://www.biodiversitylibrary.org/itempdf/93597", Item.FileType.PDF);
@@ -182,7 +175,7 @@ public class TestItem {
 		assertTrue(dummyExistingFile.createNewFile());
 		
 		createdTextFiles = item.writeTextFiles(TEST_DIRECTORY, overwriteExistingFiles);
-		assertTrue(createdTextFiles.toArray().length == 1);
+		assertEquals(1, createdTextFiles.toArray().length);
 
 		Path createdFilePath = Paths.get(TEST_DIRECTORY + "/text/txt/12345.txt");
 		Path textFilesOutputDirectory = Paths.get(TEST_DIRECTORY + "/text/txt");
@@ -191,11 +184,11 @@ public class TestItem {
 		assertTrue(createdFilePath.toFile().exists());
 		
 		createdTextFiles.add(createdFilePath);
+		createdTextFiles.add(dummyExistingFile.toPath());
 	}
 
 	@Test
 	public void testNoTextDownload() throws DownloadFailedException {
-		Item item = new Item();
 		int itemID = 54321;
 		String dummySource = "Institute of Silly Walks";
 		String dummyItemUrl = "https://www.biofid.de";
@@ -204,7 +197,7 @@ public class TestItem {
 		item.setItemId(itemID);
 		item.setDataSource(dummySource);
 		item.setItemUrl(dummyItemUrl);
-		item.setToSave(false);
+		item.setSaveMetadataOnly(true);
 
 		List<Path> downloadedFilePaths = item.writeTextFiles(TEST_DIRECTORY, false);
 		assertTrue(downloadedFilePaths.isEmpty());
@@ -212,7 +205,6 @@ public class TestItem {
 
 	@Test
 	public void testItemSerialization() throws UnsupportedOutputFormatException {
-		Item item = new Item();
 		addMetadataExampleToItem(item);
 
 		String stringifiedItem = item.getMetadataStringForFileType(Item.FileType.XML);
@@ -220,13 +212,16 @@ public class TestItem {
 		assertTrue(stringifiedItem.contains("<Author>"));
 	}
 	
-	@Before
+	@BeforeEach
 	public void setup() {
-		createdTextFiles = new ArrayList<Path>();
+		item = new Item();
+		item.setSaveMetadataOnly(false);
+
+		createdTextFiles = new ArrayList<>();
 		didTestDirectoryExistsBeforeTest = testDirectoryPath.toFile().exists();
 	}
 	
-	@After
+	@AfterEach
 	public void cleanUp() {
 		cleanAfterTest(createdTextFiles);
 	}

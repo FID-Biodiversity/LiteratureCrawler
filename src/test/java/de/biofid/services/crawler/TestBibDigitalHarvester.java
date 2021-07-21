@@ -1,6 +1,6 @@
 package de.biofid.services.crawler;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,9 +10,9 @@ import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import de.biofid.services.crawler.Harvester.UnsetHarvesterBaseDirectoryException;
 
@@ -44,7 +44,7 @@ public class TestBibDigitalHarvester {
 		assertTrue(outputMetadataFile.exists());
 	}
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
 		
@@ -56,7 +56,7 @@ public class TestBibDigitalHarvester {
 		defaultConfiguration = new Configuration(HARVESTER_NAME, HARVESTER_CLASS_PATH, new JSONObject());
 	}
 	
-	@After
+	@AfterEach
 	public void cleanUp() {
 		dummyConfigurator = null;
 		if (!didTestDirectoryExistBeforeTest && testDirectory.exists()) {

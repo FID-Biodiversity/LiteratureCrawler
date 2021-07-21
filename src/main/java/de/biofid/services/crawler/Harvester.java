@@ -76,7 +76,7 @@ public abstract class Harvester {
 		
 		while (true) {
 			Item item = createNewEmptyItem();
-			item.setToSave(this.configuration.isOnlyMetadata());
+			item.setSaveMetadataOnly(this.configuration.isOnlyMetadata());
 			
 			pause();
 			boolean next = nextItem(item);
