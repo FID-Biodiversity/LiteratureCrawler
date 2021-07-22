@@ -191,7 +191,7 @@ public class TestItem {
 	public void testNoTextDownload() throws DownloadFailedException {
 		int itemID = 54321;
 		String dummySource = "Institute of Silly Walks";
-		String dummyItemUrl = "https://www.biofid.de";
+		String dummyItemUrl = "https://www.silly-walks.com";
 
 		addMetadataExampleToItem(item);
 		item.setItemId(itemID);

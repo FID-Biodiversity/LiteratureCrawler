@@ -26,6 +26,7 @@ public class Configuration {
 		this.apiKey = conf.apiKey;
 		this.isOverwrittingEnabled = conf.isOverwrittingEnabled();
 		this.delayBetweenRequestsInMilliseconds = conf.getRequestDelay();
+		this.onlyMetadata = conf.onlyMetadata;
 	}
 	
 	public Configuration(String harvesterName, String harvesterClassName, JSONObject jsonConfiguration) {

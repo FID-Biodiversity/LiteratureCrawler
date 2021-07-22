@@ -36,7 +36,7 @@ public class TestLiteratureHarvester {
 	
 	
 	private DummyConfigurator getConfigurator() throws IOException {
-		String configurationFilePathString = "src/test/resources/test-config.yml";
+		String configurationFilePathString = "src/test/resources/configurations/test-config.yml";
 		
 		DummyConfigurator configurator = new DummyConfigurator();
 		
