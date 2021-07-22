@@ -257,7 +257,7 @@ public class ZobodatHarvester extends Harvester {
 				URL citationUrl = getCitationUrl(item);
 				long itemID = getItemIDFromUrl(citationUrl);
 				Citation citation = getCitationFromUrl(citationUrl);
-				metadataList.add(new Metadata(itemID, itemPdfUrl, citation));
+				metadataList.add(new Metadata(itemID, itemPdfUrl, citation, citationUrl));
 			}
 		}
 		
@@ -289,7 +289,6 @@ public class ZobodatHarvester extends Harvester {
 			}
 
 			citation = ZobodatCitationGenerator.generateCitationFromHtmlElement(citationContainer);
-			citation.url = url.toString();
 
 			logger.debug("Generated citation: " + citation);
 		} catch (IOException e) {

@@ -93,6 +93,7 @@ public class TestZobodatHarvester {
 		assertEquals("8", item2Citation.getJSONObject(CITATION_ISSUE_NUMBER).get("label"));
 		assertEquals("1", item2Citation.get(CITATION_FIRST_PAGE));
 		assertEquals("8", item2Citation.get(CITATION_LAST_PAGE));
+		assertEquals("https://www.zobodat.at/publikation_articles.php?id=378556", item2.getString(CITATION_URL));
 		
 		JSONObject item4 = itemMetadataJson.getJSONObject(1);
 		JSONObject item4Citation = item4.getJSONObject(METADATA_CITATION);
@@ -159,7 +160,6 @@ public class TestZobodatHarvester {
 		assertEquals(2009, citation.year);
 		assertEquals(new MetadataElement("Sabulosi", "https://www.zobodat.at/publikation_series.php?id=7392"), citation.journalName);
 		assertEquals(new MetadataElement("02", "https://www.zobodat.at/publikation_volumes.php?id=33586"), citation.issueNumber);
-		assertEquals("https://www.zobodat.at/foo", citation.url);
 	}
 
 	@Test
@@ -224,7 +224,6 @@ public class TestZobodatHarvester {
 		assertTrue(itemCitation.has(CITATION_FIRST_PAGE));
 		assertTrue(itemCitation.has(CITATION_LAST_PAGE));
 		assertTrue(itemCitation.has(CITATION_JOURNAL_NAME));
-		assertTrue(itemCitation.has(CITATION_URL));
 	}
 	
 	@AfterEach
