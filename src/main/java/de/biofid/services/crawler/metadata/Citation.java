@@ -12,7 +12,6 @@ public class Citation {
     public String lastPage = "";
     public String title = "";
     public int year = -1;
-    public String originalDataElement = "";
 
     public String toString() {
         return "Authors: " + authors.toString() + "\n Title: " + title + "\n Year: " + year + "\n"

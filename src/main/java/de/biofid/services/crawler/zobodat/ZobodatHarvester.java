@@ -66,7 +66,7 @@ public class ZobodatHarvester extends Harvester {
 	private boolean isMetadataCollected = false;
 	private Iterator<Metadata> itemMetadataIterator = null;
 	private final List<Metadata> itemMetadataList = new ArrayList<>();
-	private boolean crawlAllItems = true;
+	private boolean crawlAllItems;
 	
 	private List<Object> listOfItemsToProcess = new ArrayList<>();
 
@@ -193,7 +193,7 @@ public class ZobodatHarvester extends Harvester {
 		JSONObject itemMetadataJSON = new JSONObject(metadataJSONString);
 
 		boolean shallItemBeSaved = isItemInListOfPublicationsToStore(itemMetadataJSON);
-		item.setToSave(shallItemBeSaved);
+		item.setSaveMetadataOnly(shallItemBeSaved);
 		
 		long itemID = Long.parseLong(itemMetadataJSON.remove("id").toString());
     	logger.debug("Processing Item ID " + itemID);
@@ -257,7 +257,7 @@ public class ZobodatHarvester extends Harvester {
 				URL citationUrl = getCitationUrl(item);
 				long itemID = getItemIDFromUrl(citationUrl);
 				Citation citation = getCitationFromUrl(citationUrl);
-				metadataList.add(new Metadata(itemID, itemPdfUrl, citation));
+				metadataList.add(new Metadata(itemID, itemPdfUrl, citation, citationUrl));
 			}
 		}
 		
@@ -289,6 +289,7 @@ public class ZobodatHarvester extends Harvester {
 			}
 
 			citation = ZobodatCitationGenerator.generateCitationFromHtmlElement(citationContainer);
+
 			logger.debug("Generated citation: " + citation);
 		} catch (IOException e) {
 			logger.error("Could not collect citation site: " + url);

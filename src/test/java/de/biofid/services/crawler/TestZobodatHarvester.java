@@ -10,9 +10,8 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -32,6 +31,7 @@ public class TestZobodatHarvester {
 	private static final String CITATION_TITLE = "title";
 	private static final String CITATION_YEAR = "year";
 	private static final String CITATION_ISSUE_NUMBER = "issueNumber";
+	private static final String CITATION_URL = "url";
 	
 	private static final String ITEM_ARRAY = "items";
 	
@@ -93,6 +93,7 @@ public class TestZobodatHarvester {
 		assertEquals("8", item2Citation.getJSONObject(CITATION_ISSUE_NUMBER).get("label"));
 		assertEquals("1", item2Citation.get(CITATION_FIRST_PAGE));
 		assertEquals("8", item2Citation.get(CITATION_LAST_PAGE));
+		assertEquals("https://www.zobodat.at/publikation_articles.php?id=378556", item2.getString(CITATION_URL));
 		
 		JSONObject item4 = itemMetadataJson.getJSONObject(1);
 		JSONObject item4Citation = item4.getJSONObject(METADATA_CITATION);
@@ -133,7 +134,7 @@ public class TestZobodatHarvester {
 		ZobodatHarvester zobodatHarvesterSpy = Mockito.spy(zobodatHarvester);
 		Mockito.doReturn(emptyCitationHtml).when(zobodatHarvesterSpy).getDocumentFromUrl(startingUrl);
 
-		Assertions.assertDoesNotThrow(() -> zobodatHarvesterSpy.getCitationFromUrl(new URL(startingUrl)));
+		assertDoesNotThrow(() -> zobodatHarvesterSpy.getCitationFromUrl(new URL(startingUrl)));
 	}
 
 	@Test
@@ -181,16 +182,16 @@ public class TestZobodatHarvester {
 				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
 
 		Item item = new Item();
-		item.setToSave(false);
+		item.setSaveMetadataOnly(false);
 		Citation citation = new Citation();
 		citation.journalName = new MetadataElement("foo", "https://www.zobodat.at/publikation_series.php?id=7392");
 		Metadata metadata = new Metadata(1234, new URL("https://www.test.de"), citation);
 
-		assertFalse(item.getSaveData());
+		assertFalse(item.getSaveMetadataOnly());
 
 		zobodatHarvester.addMetadataToItem(item, metadata);
 
-		assertTrue(item.getSaveData());
+		assertTrue(item.getSaveMetadataOnly());
 	}
 
 	@Test
@@ -225,7 +226,7 @@ public class TestZobodatHarvester {
 		assertTrue(itemCitation.has(CITATION_JOURNAL_NAME));
 	}
 	
-	@After
+	@AfterEach
 	public void cleanAfterTest() throws IOException {
 		if (!didTestDirectoryExistBeforeTest && testDirectory.exists()) {
 			FileUtils.deleteDirectory(testDirectory);

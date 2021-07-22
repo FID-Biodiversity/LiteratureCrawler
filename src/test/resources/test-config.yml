@@ -30,7 +30,10 @@ Harvesters:
      
      # Overwrites the general overwriting rule for this harvester
      overwrite: false
-     
+
+    # If only to download the metadata and not the text files
+     metadata-only: false
+
      # Instead of a list you can provide a file that contains the items/titles in a list with one
      # item/title per line.
      
@@ -45,4 +48,6 @@ Harvesters:
 - Zobodat:
      class: de.biofid.services.crawler.ZobodatHarvester
      # This crawler is set up to download all texts from Zobodat, when no items are given.
+
+     metadata-only: false
    

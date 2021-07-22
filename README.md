@@ -8,11 +8,18 @@ Given a configuration file `config/harvesting.yml`, the crawler downloads all de
 The project needs OpenJDK 11+ and Maven 3.6+. At least the harvesting of items from the Botanical Garden of Madrid (via the BHLHarvester) will not work with Oracle Java 8, because of not available cipher suites for the TLS encryption.
 
 ### Building
-To build the project simply call `mvn package`. This should give you a file `target/LiteratureCrawler.jar`. This you can run simply with 
+To build the project simply call `mvn package -Dcom.sun.security.enableAIAcaIssuers=true`. This should give you a file `target/LiteratureCrawler.jar`. This you can run simply with 
 
 `java -jar target/LiteratureCrawler.jar`
 
 and the application will run.
+
+#### Why enabling `enableAIAcaIssuers`
+The `-Dcom.sun.security.enableAIAcaIssuers=true` parameter is necessary to be able to connect to the server of the Botanical Garden of Madrid. They serve their content via BHL. If this parameter is not given, the SSL connection will fail.
+
+If your want to know more on this problem: [StackOverflow is your friend](https://stackoverflow.com/a/60851862/7504509) .
+
+In the tests, this parameter is set automatically and you don't have to call it explicitly via the CLI.
 
 #### Building in Docker
 If you want or have to build a Docker image for the BIOfid Literature crawler, you can do this by:

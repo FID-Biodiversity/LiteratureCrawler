@@ -1,23 +1,18 @@
 package de.biofid.services.crawler;
 
-import static org.texttechnologylab.utilities.helper.RESTUtils.METHODS.GET;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import com.goebl.david.WebbException;
 import org.apache.http.auth.AuthenticationException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.texttechnologylab.utilities.helper.RESTUtils;
 
-import com.goebl.david.WebbException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+
+import static org.texttechnologylab.utilities.helper.RESTUtils.METHODS.GET;
 
 /***
  * A Harvester to crawl the biodiversity heritage library (BHL).
@@ -57,6 +52,7 @@ public class BhlHarvester extends Harvester {
     private static final String ITEM_ID = "ItemID";
     private static final String ITEM_PDF_URL = "ItemPDFUrl";
     private static final String ITEM_TXT_URL = "ItemTextUrl";
+    private static final String ITEM_URL = "ItemUrl";
     private static final String ITEMS = "Items";
     private static final String JSON_FORMAT = "json";
     private static final String LANGUAGE = "language";
@@ -361,6 +357,7 @@ public class BhlHarvester extends Harvester {
     	logger.debug("Processing Item ID {}", itemID);
 		item.setDataSource(BHL_STRING);
 		item.setItemId(itemID);
+		item.setItemUrl(itemMetadata.getString(ITEM_URL));
 		item.addTextFileUrl(itemMetadata.getString(ITEM_PDF_URL), Item.FileType.PDF);
 		item.addTextFileUrl(itemMetadata.getString(ITEM_TXT_URL), Item.FileType.TXT);
 		item.addTextFileUrl(getAbbyySourceUrl(itemMetadata), Item.FileType.ABBYY);
