@@ -32,10 +32,12 @@ public class TestHarvestConfigurator {
         Configuration bhlConfiguration = configurations.get(0);
         assertEquals("BHL", bhlConfiguration.getHarvesterName());
         assertFalse(bhlConfiguration.isOnlyMetadata());
+        assertTrue(bhlConfiguration.isOverwrittingEnabled());
 
         Configuration zobodatConfiguration = configurations.get(1);
         assertEquals("Zobodat", zobodatConfiguration.getHarvesterName());
         assertTrue(zobodatConfiguration.isOnlyMetadata());
+        assertFalse(zobodatConfiguration.isOverwrittingEnabled());
     }
 
     @BeforeEach
