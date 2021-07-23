@@ -1,5 +1,6 @@
 package de.biofid.services.crawler;
 
+import de.biofid.services.configuration.ConfigurationKeys;
 import org.json.JSONObject;
 
 /***
@@ -10,13 +11,17 @@ import org.json.JSONObject;
  * @version 1.0
  */
 public class Configuration {
-	
+
+	private static final boolean OVERWRITE_FILES_DEFAULT = true;
+	private static final boolean ONLY_METADATA_DEFAULT = false;
+	private static final int REQUEST_DELAY_DEFAULT = 0;
+
 	private String apiKey = null;
 	private long delayBetweenRequestsInMilliseconds = 0;
 	private String harvesterClassName;
 	private String harvesterName;
-	private boolean isOverwrittingEnabled = true;
-	private boolean onlyMetadata = false;
+	private boolean isOverwrittingEnabled = OVERWRITE_FILES_DEFAULT;
+	private boolean onlyMetadata = ONLY_METADATA_DEFAULT;
 	private JSONObject jsonConfiguration;
 	
 	public Configuration(Configuration conf) {
@@ -33,6 +38,8 @@ public class Configuration {
 		this.harvesterName = harvesterName;
 		this.harvesterClassName = harvesterClassName;
 		this.jsonConfiguration = jsonConfiguration;
+
+		setupConfigurationsFromJson(jsonConfiguration);
 	}
 	
 	public String getHarvesterApiKey() {
@@ -77,5 +84,12 @@ public class Configuration {
 
 	public void setOnlyMetadata(boolean onlyMetadata) {
 		this.onlyMetadata = onlyMetadata;
+	}
+
+	private void setupConfigurationsFromJson(JSONObject jsonConfiguration) {
+		setHarvesterApiKey(jsonConfiguration.optString(ConfigurationKeys.API_KEY));
+		setOnlyMetadata(jsonConfiguration.optBoolean(ConfigurationKeys.METADATA_ONLY, ONLY_METADATA_DEFAULT));
+		setOverwritting(jsonConfiguration.optBoolean(ConfigurationKeys.OVERWRITE_FILES, OVERWRITE_FILES_DEFAULT));
+		setRequestDelay(jsonConfiguration.optInt(ConfigurationKeys.REQUEST_DELAY, REQUEST_DELAY_DEFAULT));
 	}
 }

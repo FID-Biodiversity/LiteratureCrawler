@@ -22,6 +22,7 @@ public class TestHarvestConfigurator {
 
         Configuration bhlConfiguration = configurator.getConfigurationForHarvesterName("BHL");
         assertFalse(bhlConfiguration.isOnlyMetadata());
+        assertNotNull(bhlConfiguration.getHarvesterApiKey());
     }
 
     @Test

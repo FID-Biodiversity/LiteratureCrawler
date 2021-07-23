@@ -167,14 +167,13 @@ public class TestItem {
 		item.addTextFileUrl("https://www.biodiversitylibrary.org/itemtext/93597", Item.FileType.TXT);
 		
 		item.setItemId(itemId);
-		
-		boolean overwriteExistingFiles = false;
+
 		File textBaseFolder = testDirectoryPath.resolve("text/pdf").toFile();
 		textBaseFolder.mkdirs();
 		File dummyExistingFile = testDirectoryPath.resolve("text/pdf/12345.pdf").toFile();
 		assertTrue(dummyExistingFile.createNewFile());
 		
-		createdTextFiles = item.writeTextFiles(TEST_DIRECTORY, overwriteExistingFiles);
+		createdTextFiles = item.writeTextFiles(TEST_DIRECTORY, false);
 		assertEquals(1, createdTextFiles.toArray().length);
 
 		Path createdFilePath = Paths.get(TEST_DIRECTORY + "/text/txt/12345.txt");

@@ -1,20 +1,18 @@
 package de.biofid.services.crawler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.biofid.services.crawler.Item.DownloadFailedException;
+import de.biofid.services.crawler.Item.UnsupportedOutputFormatException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import de.biofid.services.crawler.Item.DownloadFailedException;
-import de.biofid.services.crawler.Item.UnsupportedOutputFormatException;
 
 /***
  * A Harvester crawls the data of some website and draws the literature items from it.
@@ -207,8 +205,4 @@ public abstract class Harvester {
 			super(s);
 		}
 	}
-}
-
-enum Language {
-	ENGLISH, FRENCH, GERMAN, LATIN;
 }

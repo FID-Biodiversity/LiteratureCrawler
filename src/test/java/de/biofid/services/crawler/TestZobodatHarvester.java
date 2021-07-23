@@ -45,7 +45,8 @@ public class TestZobodatHarvester {
 
 	@Test
 	public void testZobodatInstantiation() {
-		JSONObject parametersFromConfigFile = new JSONObject("{\"metadata-only\": true, \"titles\": [1234, 6789]}");
+		JSONObject parametersFromConfigFile = new JSONObject(
+				"{\"metadata-only\": true, \"overwrite\": true, \"titles\": [1234, 6789]}");
 
 		Configuration configuration = new Configuration(
 				"Zobodat",
@@ -58,6 +59,8 @@ public class TestZobodatHarvester {
 
 		assertNotNull(instantiatedHarvester);
 		assertTrue(instantiatedHarvester instanceof ZobodatHarvester);
+		assertTrue(instantiatedHarvester.configuration.isOnlyMetadata());
+		assertTrue(instantiatedHarvester.configuration.isOverwrittingEnabled());
 	}
 
 	@Test

@@ -1,6 +1,7 @@
 package de.biofid.services.crawler;
 
 import com.goebl.david.WebbException;
+import de.biofid.services.configuration.ConfigurationKeys;
 import org.apache.http.auth.AuthenticationException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,9 +37,6 @@ public class BhlHarvester extends Harvester {
     private static final String COLLECTION_DESCRIPTION = "CollectionDescription";
     private static final String COLLECTION_ID = "CollectionID";
     private static final String COLLECTION_NAME = "CollectionName";
-    
-    private static final String CONFIGURATION_ITEM_LIST = "items";
-    private static final String CONFIGURATION_TITLE_LIST = "titles";
     
     // BHL OAI Parameters
     // Documentation at https://www.biodiversitylibrary.org/docs/api3.html
@@ -85,16 +83,16 @@ public class BhlHarvester extends Harvester {
     	apiKey = configuration.getHarvesterApiKey();
     	logger.info("Got API key: {}", apiKey);
     	
-    	if (jsonConfiguration.has(CONFIGURATION_ITEM_LIST)) {
+    	if (jsonConfiguration.has(ConfigurationKeys.ITEMS)) {
     		logger.info("Loading items...");
     		
-    		listOfItemsToDownload = getListFromJsonKey(CONFIGURATION_ITEM_LIST, jsonConfiguration);
+    		listOfItemsToDownload = getListFromJsonKey(ConfigurationKeys.ITEMS, jsonConfiguration);
     	}
     	
-    	if (jsonConfiguration.has(CONFIGURATION_TITLE_LIST)) {
+    	if (jsonConfiguration.has(ConfigurationKeys.TITLES)) {
     		logger.info("Loading titles...");
     		
-    		List<Object> titles = getListFromJsonKey(CONFIGURATION_TITLE_LIST, jsonConfiguration);
+    		List<Object> titles = getListFromJsonKey(ConfigurationKeys.TITLES, jsonConfiguration);
     		List<Object> itemsExtractedFromTitle = new ArrayList<>();
     		for (Object titleObj : titles) {
     			long titleID = Long.parseLong(titleObj.toString());

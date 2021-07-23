@@ -2,6 +2,7 @@ package de.biofid.services.crawler.zobodat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.biofid.services.configuration.ConfigurationKeys;
 import de.biofid.services.crawler.Configuration;
 import de.biofid.services.crawler.Harvester;
 import de.biofid.services.crawler.Item;
@@ -18,9 +19,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -39,11 +38,6 @@ public class ZobodatHarvester extends Harvester {
 	public static final String ZOBODAT_STRING = "Zobodat";
 	
 	public static final String ATTRIBUTE_HREF = "href";
-
-	private static final String ITEM_COMPLETE_METADATA = "Item";
-	private static final String CONFIGURATION_ITEM_LIST = "items";
-	private static final String CONFIGURATION_TITLE_LIST = "titles";
-	private static final String CONFIGURATION_CRAWL_ALL_ITEMS = "crawl-all-items";
 
 	public static final Pattern REGEX_PATTERN_AUTHOR_AND_YEAR = Pattern.compile("^(.*?) ?\\(([0-9]{4})-?[0-9]{0,4}\\)");
 	public static final Pattern REGEX_PATTERN_ISSUE_NUMBER = Pattern.compile("– ([^–]*?): ");
@@ -74,23 +68,23 @@ public class ZobodatHarvester extends Harvester {
 		super(configuration);
 		
 		JSONObject jsonConfiguration = configuration.getHarvesterJsonConfiguration();
-		
-		if (jsonConfiguration.has(CONFIGURATION_ITEM_LIST)) {
-    		JSONArray itemListFromConfiguration = jsonConfiguration.getJSONArray(CONFIGURATION_ITEM_LIST);
-    		listOfItemsToProcess = StreamSupport.stream(itemListFromConfiguration.spliterator(), false)
+
+		if (jsonConfiguration.has(ConfigurationKeys.ITEMS)) {
+			JSONArray itemListFromConfiguration = jsonConfiguration.getJSONArray(ConfigurationKeys.ITEMS);
+			listOfItemsToProcess = StreamSupport.stream(itemListFromConfiguration.spliterator(), false)
 					.map(itemId -> idStringToZobodatArticleUrl((String) itemId))
 					.collect(Collectors.toList());
-    	}
+		}
 
-		if (jsonConfiguration.has(CONFIGURATION_TITLE_LIST)) {
-			JSONArray titleListFromConfiguration = jsonConfiguration.getJSONArray(CONFIGURATION_TITLE_LIST);
+		if (jsonConfiguration.has(ConfigurationKeys.TITLES)) {
+			JSONArray titleListFromConfiguration = jsonConfiguration.getJSONArray(ConfigurationKeys.TITLES);
 			List<Object> listOfTitles = StreamSupport.stream(titleListFromConfiguration.spliterator(), false)
 					.map(itemId -> (Object) idToZobodatTitleUrl((int) itemId))
 					.collect(Collectors.toList());
 			listOfItemsToProcess.addAll(listOfTitles);
 		}
 
-		crawlAllItems = jsonConfiguration.optBoolean(CONFIGURATION_CRAWL_ALL_ITEMS, true);
+		crawlAllItems = jsonConfiguration.optBoolean(ConfigurationKeys.CRAWL_ALL_ITEMS, true);
 	}
 	
 	public Document getDocumentFromUrl(String url) throws IOException {

@@ -1,20 +1,16 @@
 package de.biofid.services.crawler;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.biofid.services.configuration.ConfigurationKeys;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.*;
 
 /***
  * A class holding all configurations given in a YAML file.
@@ -24,26 +20,20 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
  * @version 1.0
  */
 public class HarvesterConfigurator {
-	
-	private static final String GENERAL_HARVESTING_DELAY = "request-delay";
-	private static final String GENERAL_LOGGER_LEVEL = "logging-level";
-	private static final String GENERAL_OUTPUT_PATH = "output-path";
-	private static final String GENERAL_OVERWRITE_STRING = "overwrite";
-	private static final String GENERAL_SETTINGS = "General";
-	
-	private static final String HARVESTER_API_KEY = "api-key";
-	private static final String HARVESTER_CLASS_NAME = "class";
-	private static final String HARVESTER_CONFIGURATIONS_PARENT = "Harvesters";
-	private static final String HARVESTER_METADATA_ONLY = "metadata-only";
 
-	private static final boolean OVERWRITTING_DEFAULT = true;
+	private static final String GENERAL_SETTINGS = "General";
+	private static final String HARVESTER_CONFIGURATIONS_PARENT = "Harvesters";
+
+	private static final boolean OVERWRITE_DEFAULT = true;
+	private static final long REQUEST_DELAY_DEFAULT = 0;
+	private static final String LOGGER_LEVEL_DEFAULT = "INFO";
 	
 	protected Map<String, String> apiKeysForHarvesters = new HashMap<>();
 	protected String baseOutputPathString = null;
 	protected List<Configuration> configurations = new ArrayList<>();
-	protected long delayBetweenRequestsInMilliseconds = 0;
-	protected boolean isOverwrittingEnabled = true;
-	protected String loggerLevel = "INFO";
+	protected long delayBetweenRequestsInMilliseconds = REQUEST_DELAY_DEFAULT;
+	protected boolean isOverwrittingEnabled = OVERWRITE_DEFAULT;
+	protected String loggerLevel = LOGGER_LEVEL_DEFAULT;
 	
 
 	public String getBaseOutputPath() {
@@ -97,15 +87,15 @@ public class HarvesterConfigurator {
 		JsonNode configurationJson = mapper.readTree(configurationFile);
 		
 		JsonNode generalSettingsTree = configurationJson.get(GENERAL_SETTINGS);
-		baseOutputPathString = generalSettingsTree.get(GENERAL_OUTPUT_PATH).asText();
-		delayBetweenRequestsInMilliseconds = generalSettingsTree.get(GENERAL_HARVESTING_DELAY).asLong();
+		baseOutputPathString = generalSettingsTree.get(ConfigurationKeys.OUTPUT_PATH).asText();
+		delayBetweenRequestsInMilliseconds = generalSettingsTree.get(ConfigurationKeys.REQUEST_DELAY).asLong();
 		
-		if (generalSettingsTree.has(GENERAL_LOGGER_LEVEL)) {
-			loggerLevel = generalSettingsTree.get(GENERAL_LOGGER_LEVEL).asText().toLowerCase();
+		if (generalSettingsTree.has(ConfigurationKeys.LOGGER_LEVEL)) {
+			loggerLevel = generalSettingsTree.get(ConfigurationKeys.LOGGER_LEVEL).asText().toLowerCase();
 		}
 		
-		if (generalSettingsTree.has(GENERAL_OVERWRITE_STRING)) {
-			isOverwrittingEnabled = generalSettingsTree.get(GENERAL_OVERWRITE_STRING).asBoolean();
+		if (generalSettingsTree.has(ConfigurationKeys.OVERWRITE_FILES)) {
+			isOverwrittingEnabled = generalSettingsTree.get(ConfigurationKeys.OVERWRITE_FILES).asBoolean();
 		}
 		
 		JsonNode harvesterConfigurationTree = configurationJson.get(HARVESTER_CONFIGURATIONS_PARENT);
@@ -118,31 +108,25 @@ public class HarvesterConfigurator {
 			String harvesterName = (String) harvesterConfiguration.keySet().toArray()[0];		
 			
 			JSONObject jsonConfiguration = new JSONArray(harvesterConfiguration.values()).getJSONObject(0);
-			String harvesterClassName = jsonConfiguration.getString(HARVESTER_CLASS_NAME);
-			
-			if (jsonConfiguration.has(HARVESTER_API_KEY)) {
-				apiKeysForHarvesters.put(harvesterName, getApiKey(jsonConfiguration));
+			String harvesterClassName = jsonConfiguration.getString(ConfigurationKeys.CLASS_NAME);
+
+			String apiKey = getApiKey(jsonConfiguration);
+			if (jsonConfiguration.has(ConfigurationKeys.API_KEY)) {
+				apiKeysForHarvesters.put(harvesterName, apiKey);
 			}
+
+			setDefaultConfigurationIfParameterIsNotPresent(jsonConfiguration);
 
 			Configuration config = new Configuration(harvesterName, harvesterClassName, jsonConfiguration);
-			config.setHarvesterApiKey(getApiKey(jsonConfiguration));
-			config.setOverwritting(getOverwrittingPolicyForHarvester(jsonConfiguration));
-			config.setRequestDelay(delayBetweenRequestsInMilliseconds);
-
-			if (jsonConfiguration.has(HARVESTER_METADATA_ONLY)) {
-				config.setOnlyMetadata(jsonConfiguration.getBoolean(HARVESTER_METADATA_ONLY));
-			}
+			config.setHarvesterApiKey(apiKey);
 
 			configurations.add(config);
 		}
 	}
 	
 	private String getApiKey(JSONObject jsonConfiguration) {
-		String apiKey = null;
-		if (!jsonConfiguration.has(HARVESTER_API_KEY)) {
-			return apiKey;
-		}
-		String apiKeyString = jsonConfiguration.getString(HARVESTER_API_KEY);
+		String apiKeyString = jsonConfiguration.optString(ConfigurationKeys.API_KEY, null);
+		String apiKey;
     	if (FileHandler.isStringPathOrFile(apiKeyString)) {
     		apiKey = readApiKey(apiKeyString);
     	} else {
@@ -150,18 +134,19 @@ public class HarvesterConfigurator {
     	}
     	return apiKey;
 	}
-	
-	private boolean getOverwrittingPolicyForHarvester(JSONObject jsonConfiguration) {
-		boolean isOverWrittingEnabled = OVERWRITTING_DEFAULT;
-		
-		if (jsonConfiguration.has(GENERAL_OVERWRITE_STRING)) {
-			isOverWrittingEnabled = jsonConfiguration.getBoolean(GENERAL_OVERWRITE_STRING);
-		}
-		
-		return isOverWrittingEnabled;
-	}
-    
+
 	private String readApiKey(String apiSourceFile) {
 		return FileHandler.getFileContent(apiSourceFile);
     }
+
+    private void setDefaultConfigurationIfParameterIsNotPresent(JSONObject configuration) {
+		setDefaultIfNotPresent(configuration, ConfigurationKeys.OVERWRITE_FILES, OVERWRITE_DEFAULT);
+		setDefaultIfNotPresent(configuration, ConfigurationKeys.REQUEST_DELAY, REQUEST_DELAY_DEFAULT);
+	}
+
+	private void setDefaultIfNotPresent(JSONObject configuration, String key, Object defaultValue) {
+		if (!configuration.has(key)) {
+			configuration.put(key, defaultValue);
+		}
+	}
 }

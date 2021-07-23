@@ -50,7 +50,7 @@ public class LiteratureHarvester {
 	 */
 	public Harvester instantiateHarvester(Configuration harvesterConfiguration) {
 		String harvesterName = harvesterConfiguration.getHarvesterClassName();
-		Constructor<Harvester> harvesterConstructor = null;
+		Constructor<Harvester> harvesterConstructor;
 		try {
 			 harvesterConstructor = getHarvesterConstructorForName(harvesterName);
 		} catch (ClassNotFoundException | NoSuchMethodException ex) {
