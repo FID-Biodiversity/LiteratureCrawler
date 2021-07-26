@@ -19,6 +19,7 @@ public class TestHarvestConfigurator {
         configurator.readConfigurationYamlFile(TEST_CONFIGURATION);
         Configuration zobodatConfiguration = configurator.getConfigurationForHarvesterName("Zobodat");
         assertTrue(zobodatConfiguration.isOnlyMetadata());
+        assertFalse(zobodatConfiguration.isOverwrittingEnabled());
 
         Configuration bhlConfiguration = configurator.getConfigurationForHarvesterName("BHL");
         assertFalse(bhlConfiguration.isOnlyMetadata());

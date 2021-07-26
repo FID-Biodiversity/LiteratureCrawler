@@ -47,6 +47,8 @@ public abstract class Harvester {
 		}
 		
 		this.configuration = configuration;
+
+		logger.info("Instantiated " + this.getClass().getName() + " with the configuration: \n" + configuration);
 	}
 
 	/***

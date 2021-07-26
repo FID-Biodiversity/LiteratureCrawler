@@ -16,8 +16,10 @@ import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,7 +46,7 @@ public class TestZobodatHarvester {
 	private File testDirectory = null;
 
 	@Test
-	public void testZobodatInstantiation() {
+	public void testZobodatInstantiation() throws MalformedURLException {
 		JSONObject parametersFromConfigFile = new JSONObject(
 				"{\"metadata-only\": true, \"overwrite\": true, \"titles\": [1234, 6789]}");
 
@@ -61,6 +63,11 @@ public class TestZobodatHarvester {
 		assertTrue(instantiatedHarvester instanceof ZobodatHarvester);
 		assertTrue(instantiatedHarvester.configuration.isOnlyMetadata());
 		assertTrue(instantiatedHarvester.configuration.isOverwrittingEnabled());
+
+		Item item = new Item();
+		((ZobodatHarvester) instantiatedHarvester).addMetadataToItem(item,
+				new Metadata(1234, new URL("https://www.biofid.de"), new Citation()));
+		assertTrue(item.shallOnlyMetadataBeSaved());
 	}
 
 	@Test

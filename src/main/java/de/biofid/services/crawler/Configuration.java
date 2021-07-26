@@ -92,4 +92,17 @@ public class Configuration {
 		setOverwritting(jsonConfiguration.optBoolean(ConfigurationKeys.OVERWRITE_FILES, OVERWRITE_FILES_DEFAULT));
 		setRequestDelay(jsonConfiguration.optInt(ConfigurationKeys.REQUEST_DELAY, REQUEST_DELAY_DEFAULT));
 	}
+
+	@Override
+	public String toString() {
+		return "{" +
+				"apiKey='" + apiKey + '\'' +
+				", delayBetweenRequestsInMilliseconds=" + delayBetweenRequestsInMilliseconds +
+				", harvesterClassName='" + harvesterClassName + '\'' +
+				", harvesterName='" + harvesterName + '\'' +
+				", isOverwrittingEnabled=" + isOverwrittingEnabled +
+				", onlyMetadata=" + onlyMetadata +
+				", jsonConfiguration=" + jsonConfiguration +
+				'}';
+	}
 }

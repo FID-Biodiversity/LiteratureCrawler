@@ -187,7 +187,8 @@ public class ZobodatHarvester extends Harvester {
 		JSONObject itemMetadataJSON = new JSONObject(metadataJSONString);
 
 		boolean shallItemBeSaved = isItemInListOfPublicationsToStore(itemMetadataJSON);
-		item.setSaveMetadataOnly(shallItemBeSaved);
+
+		item.setSaveMetadataOnly(shallItemBeSaved || configuration.isOnlyMetadata());
 		
 		long itemID = Long.parseLong(itemMetadataJSON.remove("id").toString());
     	logger.debug("Processing Item ID " + itemID);

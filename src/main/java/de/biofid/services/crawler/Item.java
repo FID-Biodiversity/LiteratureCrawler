@@ -1,13 +1,5 @@
 package de.biofid.services.crawler;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +7,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
 import org.texttechnologylab.utilities.helper.FileUtils;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 /***
  * An item holds all metadata of a single book or monography.
