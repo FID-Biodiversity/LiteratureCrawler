@@ -14,6 +14,4 @@ COPY . .
 
 RUN mvn package -Dcom.sun.security.enableAIAcaIssuers=true
 
-COPY config/harvesting.yml config/
-
 ENTRYPOINT java -jar /usr/src/literature-crawler/target/LiteratureCrawler.jar
