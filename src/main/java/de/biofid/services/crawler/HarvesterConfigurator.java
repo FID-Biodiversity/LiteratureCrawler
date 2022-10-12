@@ -89,7 +89,7 @@ public class HarvesterConfigurator {
 	public void readConfigurationYamlFile(String configurationFileString) throws IOException {
 		File configurationFile = Paths.get(configurationFileString).toFile();
 
-		logger.info("Reading configuration from file " + configurationFileString);
+		logger.info("Reading configuration from file " + configurationFile.getAbsolutePath());
 		
 		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 		JsonNode configurationJson = mapper.readTree(configurationFile);
