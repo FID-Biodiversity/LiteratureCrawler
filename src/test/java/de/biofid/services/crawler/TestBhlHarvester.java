@@ -163,7 +163,10 @@ public class TestBhlHarvester {
         Path expectedMetadataFilePath = expectedMetadataDirectory.resolve(itemID + ".xml");
         Path expectedPdfFilePath = expectedTextDirectory.resolve("pdf/" + itemID + ".pdf");
 
-        assertTrue(expectedPdfFilePath.toFile().exists());
+        // Currently (2022-10-12) the Bot. Garden of Madrid does not provide PDFs. If this is fixed,
+        // the comments below can be uncommented.
+        //assertTrue(expectedPdfFilePath.toFile().exists());
+        assertFalse(expectedPdfFilePath.toFile().exists());
         assertTrue(expectedMetadataFilePath.toFile().exists());
     }
 

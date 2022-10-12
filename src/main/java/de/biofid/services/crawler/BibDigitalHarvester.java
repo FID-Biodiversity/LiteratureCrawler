@@ -102,7 +102,12 @@ public class BibDigitalHarvester extends Harvester {
     	logger.debug("Processing Item ID {}", itemID);
     	
 		item.setDataSource(BIBDIGITAL_BOTANICAL_GARDEN_MADRID_STRING);
-		item.addTextFileUrl(itemMetadata.getPdfURL().toString(), Item.FileType.PDF);
+
+		URL pdfUrl = itemMetadata.getPdfURL();
+		if (pdfUrl != null) {
+			logger.debug("Adding PDF URL '" + pdfUrl+ "' to the item!" );
+			item.addTextFileUrl(pdfUrl.toString(), Item.FileType.PDF);
+		}
 		item.setItemId(itemID);
 	
 		try {
@@ -123,7 +128,13 @@ public class BibDigitalHarvester extends Harvester {
 		String itemAuthor = extractMetadataAttributeFromMetadataElements(METADATA_AUTHOR_KEY, metadataElements);
 		String itemPublicationDate = extractMetadataAttributeFromMetadataElements(
 				METADATA_PUBLICATION_DATE, metadataElements);
-		URL pdfUrl = extractPdfUrlFromDocument(itemHtmlDocument);
+
+		URL pdfUrl;
+		try {
+			pdfUrl = extractPdfUrlFromDocument(itemHtmlDocument);
+		} catch (PdfNotAvailableException e) {
+			pdfUrl = null;
+		}
 		
 		Citation citation = new BibDigitalCitation();
 		citation.setTitle(itemTitle);
@@ -158,6 +169,11 @@ public class BibDigitalHarvester extends Harvester {
 	private URL extractPdfUrlFromDocument(Document document) throws IOException {
 		Element downloadableFileListNode = document.getElementsByClass(
 				CLASS_DOWNLOADABLE_FILES_STRING).first();
+
+		if (downloadableFileListNode == null) {
+			throw new PdfNotAvailableException("The PDF file could not be found!");
+		}
+
 		for (Element fileNode : downloadableFileListNode.getElementsByTag(TAG_NAME_LIST_ELEMENT)) {
 			if (fileNode.text().contains(FULL_PDF_STRING)) {
 				String pdfUrl = fileNode.child(0).attr(ATTRIBUTE_HREF);

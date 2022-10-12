@@ -1,6 +1,7 @@
 package de.biofid.services.crawler;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +40,11 @@ public class TestBibDigitalHarvester {
 				"/text/pdf/15729.pdf").toFile();
 		File outputMetadataFile = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + "/" + harvester.getFolderName() + 
 				"/metadata/xml/15729.xml").toFile();
-		
-		assertTrue(outputTextFile.exists());
+
+		// Currently (2022-10-12) the Bot. Garden of Madrid does not provide PDFs. If this is fixed,
+		// the comments below can be uncommented.
+		//assertTrue(outputTextFile.exists());
+		assertFalse(outputTextFile.exists());
 		assertTrue(outputMetadataFile.exists());
 	}
 	
