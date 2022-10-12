@@ -15,9 +15,12 @@ public class TestLiteratureHarvester {
 	
 	DummyConfigurator configurator = null;
 
+	private String testConfigFilePath = "src/test/resources/configurations/test-config.yml";
+
 	@Test
 	public void testHarvesterInstantiation() {
 		Harvester.setOutputDirectory("path/to/output");
+		LiteratureHarvester.CONFIGURATION_FILE_PATH_STRING = testConfigFilePath;
 		LiteratureHarvester literatureHarvester = new LiteratureHarvester();
 		Configuration configuration = configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING);
 		Harvester instantiatedHarvester = literatureHarvester.instantiateHarvester(configuration);
@@ -36,7 +39,7 @@ public class TestLiteratureHarvester {
 	
 	
 	private DummyConfigurator getConfigurator() throws IOException {
-		String configurationFilePathString = "src/test/resources/configurations/test-config.yml";
+		String configurationFilePathString = testConfigFilePath;
 		
 		DummyConfigurator configurator = new DummyConfigurator();
 		

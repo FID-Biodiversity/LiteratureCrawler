@@ -17,9 +17,10 @@ import org.apache.logging.log4j.Logger;
  * @version 1.0
  */
 public class LiteratureHarvester {
-	
-	public static final String CONFIGURATION_FILE_PATH_STRING = "config/harvesting.yml";
+
 	public static final String LOGGER_NAME = "global";
+
+	public static String CONFIGURATION_FILE_PATH_STRING = "config/harvesting.yml";
 	
 	private static final Logger logger = LogManager.getLogger(LOGGER_NAME);
 	

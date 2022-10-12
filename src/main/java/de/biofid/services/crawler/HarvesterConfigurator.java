@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /***
  * A class holding all configurations given in a YAML file.
  * 
@@ -34,6 +37,9 @@ public class HarvesterConfigurator {
 	protected long delayBetweenRequestsInMilliseconds = REQUEST_DELAY_DEFAULT;
 	protected boolean isOverwrittingEnabled = OVERWRITE_DEFAULT;
 	protected String loggerLevel = LOGGER_LEVEL_DEFAULT;
+
+	private static final String loggerName = "Configurator";
+	private static final Logger logger = LogManager.getLogger(loggerName);
 	
 
 	public String getBaseOutputPath() {
@@ -82,6 +88,8 @@ public class HarvesterConfigurator {
 	@SuppressWarnings("rawtypes")
 	public void readConfigurationYamlFile(String configurationFileString) throws IOException {
 		File configurationFile = Paths.get(configurationFileString).toFile();
+
+		logger.info("Reading configuration from file " + configurationFileString);
 		
 		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 		JsonNode configurationJson = mapper.readTree(configurationFile);
