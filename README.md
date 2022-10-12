@@ -35,10 +35,10 @@ To run the image in a container, call:
 ```
 mkdir output
 mkdir logs
-docker run -v "$PWD"/output:/harvesting -v "$PWD"/logs:/usr/src/literature-crawler/logs --user $(id -u):$(id -g) literature-crawler:latest
+docker run -v "$PWD"/output:/harvesting -v "$PWD"/logs:/usr/src/literature-crawler/logs  -v "$PWD"/config/harvesting.yml:/usr/src/literature-crawler/config/harvesting.yml --user $(id -u):$(id -g) literature-crawler:latest
 ```
 
-This command will put all the content generated in the container, put into the folder `output` in your current directory.
+This command will put all the content generated in the container, put into the folder `output` in your current directory. Furthermore, it mounts the directories `output` and `logs` to the running container, so you have both permanent. Also, the configuration file is mounted to the container, so you can configure the harvester, even after you have build it.
 
 ### Testing
 To run all unit tests on a UNIX machine call `mvn test`.
