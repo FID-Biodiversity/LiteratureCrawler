@@ -71,6 +71,18 @@ public class TestZobodatHarvester {
 	}
 
 	@Test
+	public void testZobodatInstantiationOnlyForFulltextHarvesting() throws IOException {
+		HarvesterConfigurator configurator = getConfigurator("src/test/resources/configurations/zobodat-fulltext-only-config.yml");
+		Configuration configuration = configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING);
+
+		LiteratureHarvester literatureHarvester = new LiteratureHarvester();
+		ZobodatHarvester instantiatedHarvester = (ZobodatHarvester) literatureHarvester.instantiateHarvester(configuration);
+
+		assertNotNull(instantiatedHarvester);
+		assertEquals(21, instantiatedHarvester.getListOfItemsToProcess().size());
+	}
+
+	@Test
 	public void testFetchingItemListDirectly() throws IOException {
 		DummyConfigurator configurator = setup();
 		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
@@ -267,5 +279,11 @@ public class TestZobodatHarvester {
 	private Document loadDocumentHtml(String filePath) throws IOException {
 		File testFilePath = new File(filePath);
 		return Jsoup.parse(testFilePath, "UTF-8");
+	}
+
+	private DummyConfigurator getConfigurator(String testConfigFilePath) throws IOException {
+		DummyConfigurator configurator = new DummyConfigurator();
+		configurator.readConfigurationYamlFile(testConfigFilePath);
+		return configurator;
 	}
 }

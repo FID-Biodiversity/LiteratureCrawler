@@ -43,7 +43,7 @@ Harvesters:
         - 5678
         
      # Titles are collections of items. E.g. a journal series.
-     titles: path/to/some/file.txt
+     titles: ../listOfTitles.txt
 
 - Zobodat:
      class: de.biofid.services.crawler.ZobodatHarvester

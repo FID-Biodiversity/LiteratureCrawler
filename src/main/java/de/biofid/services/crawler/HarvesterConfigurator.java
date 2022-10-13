@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.biofid.services.configuration.ConfigurationKeys;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -123,6 +126,8 @@ public class HarvesterConfigurator {
 				apiKeysForHarvesters.put(harvesterName, apiKey);
 			}
 
+			readItemsAndTitlesToArrays(jsonConfiguration, configurationFile.getParent());
+
 			setDefaultConfigurationIfParameterIsNotPresent(jsonConfiguration);
 
 			Configuration config = new Configuration(harvesterName, harvesterClassName, jsonConfiguration);
@@ -130,6 +135,47 @@ public class HarvesterConfigurator {
 
 			configurations.add(config);
 		}
+	}
+
+	/**
+	 * If for either the keyword title or item a single string (not a list) is given,
+	 * this string will be interpreted as a file path and the content of the file will be read.
+	 * The configuration is updated in-place.
+	 * @param jsonConfiguration The Harvester configuration as JSON.
+	 * @throws IOException
+	 */
+	private void readItemsAndTitlesToArrays(JSONObject jsonConfiguration, String configurationFileDirectoryPathString) throws IOException {
+		Path configurationFilePath = Paths.get(configurationFileDirectoryPathString);
+		updateConfigurationParametersWithFileContents(ConfigurationKeys.TITLES, jsonConfiguration, configurationFilePath);
+		updateConfigurationParametersWithFileContents(ConfigurationKeys.ITEMS, jsonConfiguration, configurationFilePath);
+	}
+
+	private void updateConfigurationParametersWithFileContents(String parameterKey, JSONObject jsonConfiguration,
+															   Path configurationFilePath) throws IOException {
+		if (jsonConfiguration.has(parameterKey)) {
+			Object ids = readContentFromConfigurationKey(parameterKey,
+					jsonConfiguration, configurationFilePath);
+			jsonConfiguration.put(parameterKey, ids);
+		}
+	}
+
+	private JSONArray readContentFromConfigurationKey(String parameterKey,
+														 JSONObject jsonConfiguration,
+														 Path configurationFilePath) throws IOException {
+		String parameterValue;
+		try {
+			parameterValue = jsonConfiguration.getString(parameterKey);
+		} catch (JSONException e) {
+			return jsonConfiguration.getJSONArray(parameterKey);
+		}
+
+		Path filePath = Paths.get(parameterValue);
+		if (!filePath.isAbsolute()) {
+			filePath = configurationFilePath.resolve(filePath);
+		}
+
+		String fileContent = Files.readString(filePath);
+		return new JSONArray(fileContent.split("\n"));
 	}
 	
 	private String getApiKey(JSONObject jsonConfiguration) {

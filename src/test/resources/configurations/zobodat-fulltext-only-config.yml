@@ -1,0 +1,11 @@
+General:
+  output-path: /harvesting
+  overwrite: true
+  request-delay: 100
+
+Harvesters:
+- Zobodat:
+    class: de.biofid.services.crawler.zobodat.ZobodatHarvester
+    metadata-only: false
+    titles: ../listOfTitles.txt
+    crawl-all-items: false
