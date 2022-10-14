@@ -1,13 +1,15 @@
 package de.biofid.services.crawler;
 
 import de.biofid.services.configuration.ConfigurationKeys;
+import de.biofid.services.crawler.configuration.FilterConfiguration;
 import org.json.JSONObject;
 
+import java.util.List;
+
 /***
- * A single configuration holding all necessary settings for a single {@link de.biofid.services.crawler.Harvester}.
- * 
+ * A single configuration holding all necessary settings for a single {@link Harvester}.
+ *
  * @author Adrian Pachzelt (University Library Johann Christian Senckenberg, Frankfurt)
- * @author https://www.biofid.de
  * @version 1.0
  */
 public class Configuration {
@@ -22,6 +24,7 @@ public class Configuration {
 	private String harvesterName;
 	private boolean isOverwrittingEnabled = OVERWRITE_FILES_DEFAULT;
 	private boolean onlyMetadata = ONLY_METADATA_DEFAULT;
+	private List<FilterConfiguration> filterConfigurations;
 	private JSONObject jsonConfiguration;
 	
 	public Configuration(Configuration conf) {
@@ -69,6 +72,10 @@ public class Configuration {
 	public boolean isOnlyMetadata() {
 		return onlyMetadata;
 	}
+
+	public List<FilterConfiguration> getFilterConfiguration() {
+		return filterConfigurations;
+	}
 	
 	public void setHarvesterApiKey(String apiKey) {
 		this.apiKey = apiKey;
@@ -84,6 +91,10 @@ public class Configuration {
 
 	public void setOnlyMetadata(boolean onlyMetadata) {
 		this.onlyMetadata = onlyMetadata;
+	}
+
+	public void setFilterConfigurations(List<FilterConfiguration> filterConfigurations) {
+		this.filterConfigurations = filterConfigurations;
 	}
 
 	private void setupConfigurationsFromJson(JSONObject jsonConfiguration) {

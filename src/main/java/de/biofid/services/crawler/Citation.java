@@ -7,9 +7,7 @@ import java.util.regex.Pattern;
 
 /***
  * An abstract class holding the citation data for an item.
- * 
- * Its purpose is that of a container to improve readability. Hence all variables are public.
- * 
+ *
  * @author Adrian Pachzelt (University Library Johann Christian Senckenberg, Frankfurt)
  * @author https://www.biofid.de
  * @version 1.0

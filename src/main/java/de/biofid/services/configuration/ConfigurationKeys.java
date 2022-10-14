@@ -1,6 +1,13 @@
 package de.biofid.services.configuration;
 
 public class ConfigurationKeys {
+    // High level configuration keys
+    public static final String GENERAL_SETTINGS = "General";
+    public static final String ITEM_FILTER_CONFIGURATIONS = "ItemFilter";
+
+    public static final String HARVESTER_SETTINGS = "Harvesters";
+
+    // Harvester specific configuration keys
     public static final String CLASS_NAME = "class";
     public static final String CRAWL_ALL_ITEMS = "crawl-all-items";
     public static final String API_KEY = "api-key";

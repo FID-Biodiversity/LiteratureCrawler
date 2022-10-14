@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.biofid.services.configuration.ConfigurationKeys;
+import de.biofid.services.crawler.configuration.FilterConfiguration;
+import de.biofid.services.crawler.configuration.FilterConfigurationFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,8 +29,8 @@ import org.apache.logging.log4j.Logger;
  */
 public class HarvesterConfigurator {
 
-	private static final String GENERAL_SETTINGS = "General";
-	private static final String HARVESTER_CONFIGURATIONS_PARENT = "Harvesters";
+	public static final String GENERAL_SETTINGS = ConfigurationKeys.GENERAL_SETTINGS;
+	public static final String HARVESTER_CONFIGURATIONS_PARENT = ConfigurationKeys.HARVESTER_SETTINGS;
 
 	private static final boolean OVERWRITE_DEFAULT = true;
 	private static final long REQUEST_DELAY_DEFAULT = 0;
@@ -114,27 +116,43 @@ public class HarvesterConfigurator {
 		@SuppressWarnings("unchecked")
 		List<LinkedHashMap> harvesterConfigurationList = new ObjectMapper().convertValue(
 				harvesterConfigurationTree, ArrayList.class);
-		
+
+		FilterConfigurationFactory filterConfigurationFactory = setupFilterConfigurationFactory(configurationJson);
+
+		String configurationFileDirectoryPathString = configurationFile.getParent();
 		for (LinkedHashMap harvesterConfiguration : harvesterConfigurationList) {
-			String harvesterName = (String) harvesterConfiguration.keySet().toArray()[0];		
-			
+			String harvesterName = (String) harvesterConfiguration.keySet().toArray()[0];
+
 			JSONObject jsonConfiguration = new JSONArray(harvesterConfiguration.values()).getJSONObject(0);
-			String harvesterClassName = jsonConfiguration.getString(ConfigurationKeys.CLASS_NAME);
+			Configuration config =
+					createHarvesterConfigurations(
+							harvesterName, jsonConfiguration, configurationFileDirectoryPathString);
 
-			String apiKey = getApiKey(jsonConfiguration);
-			if (jsonConfiguration.has(ConfigurationKeys.API_KEY)) {
-				apiKeysForHarvesters.put(harvesterName, apiKey);
-			}
+			List<FilterConfiguration> filterConfigurations =
+					filterConfigurationFactory.getFilterConfigurationsForHarvesterName(config.getHarvesterName());
+			config.setFilterConfigurations(filterConfigurations);
 
-			readItemsAndTitlesToArrays(jsonConfiguration, configurationFile.getParent());
-
-			setDefaultConfigurationIfParameterIsNotPresent(jsonConfiguration);
-
-			Configuration config = new Configuration(harvesterName, harvesterClassName, jsonConfiguration);
-			config.setHarvesterApiKey(apiKey);
-
-			configurations.add(config);
+			this.configurations.add(config);
 		}
+	}
+
+	private Configuration createHarvesterConfigurations(String harvesterName, JSONObject harvesterConfiguration,
+											   String configurationFileDirectoryPathString) throws IOException {
+		String harvesterClassName = harvesterConfiguration.getString(ConfigurationKeys.CLASS_NAME);
+
+		String apiKey = getApiKey(harvesterConfiguration);
+		if (harvesterConfiguration.has(ConfigurationKeys.API_KEY)) {
+			apiKeysForHarvesters.put(harvesterName, apiKey);
+		}
+
+		readItemsAndTitlesToArrays(harvesterConfiguration, configurationFileDirectoryPathString);
+
+		setDefaultConfigurationIfParameterIsNotPresent(harvesterConfiguration);
+
+		Configuration config = new Configuration(harvesterName, harvesterClassName, harvesterConfiguration);
+		config.setHarvesterApiKey(apiKey);
+
+		return config;
 	}
 
 	/**
@@ -176,6 +194,21 @@ public class HarvesterConfigurator {
 
 		String fileContent = Files.readString(filePath);
 		return new JSONArray(fileContent.split("\n"));
+	}
+
+	private FilterConfigurationFactory setupFilterConfigurationFactory(JsonNode configuration) {
+		FilterConfigurationFactory filterConfigurationFactory = new FilterConfigurationFactory();
+
+		if (configuration.has(ConfigurationKeys.ITEM_FILTER_CONFIGURATIONS)) {
+			JsonNode itemFilterConfiguration = configuration.get(ConfigurationKeys.ITEM_FILTER_CONFIGURATIONS);
+
+			HashMap configurationList = new ObjectMapper().convertValue(
+					itemFilterConfiguration, HashMap.class);
+
+			filterConfigurationFactory.parseFilterConfigurations(new JSONObject(configurationList));
+		}
+
+		return filterConfigurationFactory;
 	}
 	
 	private String getApiKey(JSONObject jsonConfiguration) {

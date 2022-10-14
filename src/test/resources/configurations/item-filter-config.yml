@@ -1,0 +1,34 @@
+General:
+  output-path: /harvesting
+  overwrite: true
+  request-delay: 100
+
+ItemFilter:
+  # Checks an Item object's citation for filter criteria
+  General:
+    # A filter criteria can be applied to ALL Harvesters, putting it in the "General" section.
+    year:
+      # Filter for publication year
+      EqualLess:
+        1923
+  BHL:
+    # A filter for a specific Harvester can be stated by using the Harvester's name.
+    # More general filters (i.e. from the "General" section) will all(!) be overwritten.
+    title:
+      contains:
+        "test"
+
+Harvesters:
+  - BHL:
+      class: de.biofid.services.crawler.BhlHarvester
+      api-key: config/bhl-api-key.txt
+      metadata-only: false
+      items:
+        - 1234
+        - 5678
+      titles: ../listOfTitles.txt
+
+  - Zobodat:
+      class: de.biofid.services.crawler.ZobodatHarvester
+      overwrite: false
+      metadata-only: true
