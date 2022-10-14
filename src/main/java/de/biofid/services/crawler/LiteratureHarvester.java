@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
 
+import de.biofid.services.crawler.filter.Filter;
+import de.biofid.services.crawler.filter.FilterFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -67,7 +70,15 @@ public class LiteratureHarvester {
 			logSevereError("Could not instantiate Harvester '" + harvesterName + "'!", ex);
 			return null;
 		}
-		
+
+		try {
+			List<Filter> filters = FilterFactory.create(harvesterConfiguration.getFilterConfiguration());
+			harvester.setFilters(filters);
+		} catch (FilterFactory.UnsupportedFilterTypeException ex) {
+			logSevereError("The given filter type is not implemented!", ex);
+			return null;
+		}
+
 		return harvester;
 	}
 	

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.biofid.services.crawler.Item.DownloadFailedException;
 import de.biofid.services.crawler.Item.UnsupportedOutputFormatException;
+import de.biofid.services.crawler.filter.Filter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -12,7 +13,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /***
  * A Harvester crawls the data of some website and draws the literature items from it.
@@ -31,6 +34,8 @@ public abstract class Harvester {
 	
 	protected Configuration configuration;
 	protected long millisecondsDelayBetweenRequests = 0;
+
+	protected List<Filter> filters = new ArrayList<>();
 
 	// Logging for all sub-classes
 	protected Logger logger = LogManager.getLogger(LiteratureHarvester.LOGGER_NAME);
@@ -57,6 +62,10 @@ public abstract class Harvester {
 	public static void setOutputDirectory(String outputDirectory) {
 		Harvester.baseOutputDirectory = outputDirectory;
 	}
+
+	public void setFilters(List<Filter> filters) {
+		this.filters = filters;
+	}
 	
 	public final Path getWorkingDirectory() {
 		return Paths.get(baseOutputDirectory, getFolderName().toLowerCase());
@@ -81,7 +90,12 @@ public abstract class Harvester {
 			pause();
 			boolean next = nextItem(item);
 			if (next) {
-				processItem(item);
+				if (isItemValid(item)) {
+					processItem(item);
+				} else {
+					logger.info("Item ID {} did not comply with the given filters and hence is not further processed.",
+							item.getItemId());
+				}
 			} else {
 				logger.info("All items of Harvester {} processed!", this.getClass().getName());
 				break;
@@ -135,6 +149,23 @@ public abstract class Harvester {
 		ObjectMapper mapper = new ObjectMapper();
 		String metdataJSONString = mapper.writeValueAsString(obj);
 		return new JSONObject(metdataJSONString);
+	}
+
+	/**
+	 * Checks, if a given {@link Item} agrees with all configured {@link Filter}s.
+	 * @param item The {@link Item} object to check.
+	 * @return True, if the {@link Item} complies with all filters. False, otherwise.
+	 */
+	protected boolean isItemValid(Item item) {
+		for (Filter filter : filters) {
+			if (!filter.isItemValid(item)) {
+				logger.debug("The metadata of Item {} did not comply with filter {} from Harvester {}",
+						item.getItemId(), filter, this.getClass().getName());
+				return false;
+			}
+		}
+
+		return true;
 	}
 	
 	private boolean createDirectoryIfNotExisting(Path pathToCreate) {

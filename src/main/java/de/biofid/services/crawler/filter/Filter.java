@@ -14,4 +14,5 @@ abstract public class Filter {
      */
     abstract public boolean isItemValid(Item item);
     abstract public boolean equals(Filter other);
+    abstract public String toString();
 }

@@ -7,14 +7,14 @@ ItemFilter:
   # Checks an Item object's citation for filter criteria
   General:
     # A filter criteria can be applied to ALL Harvesters, putting it in the "General" section.
-    year:
+    Year:
       # Filter for publication year
       EqualLess:
         1923
   BHL:
     # A filter for a specific Harvester can be stated by using the Harvester's name.
     # More general filters (i.e. from the "General" section) will all(!) be overwritten.
-    title:
+    Title:
       contains:
         "test"
 
@@ -29,6 +29,6 @@ Harvesters:
       titles: ../listOfTitles.txt
 
   - Zobodat:
-      class: de.biofid.services.crawler.ZobodatHarvester
+      class: de.biofid.services.crawler.zobodat.ZobodatHarvester
       overwrite: false
       metadata-only: true

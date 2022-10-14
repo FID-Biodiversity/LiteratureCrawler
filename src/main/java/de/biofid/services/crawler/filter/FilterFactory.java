@@ -11,6 +11,10 @@ import java.util.List;
  */
 public class FilterFactory {
     public static List<Filter> create(List<FilterConfiguration> configurations) throws UnsupportedFilterTypeException {
+        if (configurations == null) {
+            return new ArrayList<>();
+        }
+
         List<Filter> filters = new ArrayList<>();
         for (FilterConfiguration configuration : configurations) {
             Filter filter;

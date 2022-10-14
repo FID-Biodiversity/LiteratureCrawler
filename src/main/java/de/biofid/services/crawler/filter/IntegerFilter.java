@@ -1,6 +1,7 @@
 package de.biofid.services.crawler.filter;
 
 import de.biofid.services.crawler.Item;
+import org.json.JSONObject;
 
 /**
  * A filter that evaluates Items by criteria that are integers.
@@ -21,7 +22,8 @@ public class IntegerFilter extends Filter {
     public boolean isItemValid(Item item) {
         int defaultValue = -99999;
         boolean evaluationResult;
-        int itemMetadataValue = item.getItemMetadata().optInt(metadataParameterName, defaultValue);
+        int itemMetadataValue = getValueForCaseInsensitiveKey(
+                metadataParameterName, item.getItemMetadata(), defaultValue);
 
         if (itemMetadataValue == defaultValue) {
             evaluationResult = true;
@@ -44,5 +46,20 @@ public class IntegerFilter extends Filter {
                     otherFilter.expectedValue.equals(this.expectedValue) &&
                     otherFilter.comparisonResult.equals(this.comparisonResult);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "{expectedValue: " + this.expectedValue +
+                ", parameterName: " + this.metadataParameterName +
+                ", comparison: " + this.comparisonResult + "}";
+    }
+
+    private int getValueForCaseInsensitiveKey(String key, JSONObject jsonObject, int defaultValue) {
+        int itemMetadataValue = jsonObject.optInt(key, defaultValue);
+        if (itemMetadataValue == defaultValue) {
+            itemMetadataValue = jsonObject.optInt(key.toLowerCase(), defaultValue);
+        }
+        return itemMetadataValue;
     }
 }

@@ -24,7 +24,7 @@ public class TestFilterFactory {
 
         assertEquals(1, filters.size());
 
-        Filter expectedFilter = new IntegerFilter("year", 1923, ComparisonResult.EQUAL_LESS);
+        Filter expectedFilter = new IntegerFilter("Year", 1923, ComparisonResult.EQUAL_LESS);
         assertTrue(expectedFilter.equals(filters.get(0)));
     }
 
@@ -36,7 +36,7 @@ public class TestFilterFactory {
 
         assertEquals(1, filters.size());
 
-        Filter expectedFilter = new StringFilter("title", "test", ComparisonResult.CONTAINS);
+        Filter expectedFilter = new StringFilter("Title", "test", ComparisonResult.CONTAINS);
         assertTrue(expectedFilter.equals(filters.get(0)));
     }
 

@@ -1,7 +1,16 @@
 package de.biofid.services.crawler.filter;
 
 import de.biofid.services.crawler.Item;
+import org.json.JSONObject;
 
+/**
+ * A filter that evaluates Items by criteria that are Strings.
+ * String comparisons are case-insensitive!
+ * Given strings are not considered words, but only need to be part of the given text.
+ * Example:
+ *      Given is the string "test". Following titles will be filtered out:
+ *          "A Story of Testing", "I test my code"
+ */
 public class StringFilter extends Filter {
 
     private final String expectedValue;
@@ -18,7 +27,12 @@ public class StringFilter extends Filter {
     public boolean isItemValid(Item item) {
         String defaultValue = null;
         boolean evaluationResult;
-        String itemMetadataValue = item.getItemMetadata().optString(metadataParameterName, defaultValue);
+        String itemMetadataValue = getValueForCaseInsensitiveKey(
+                metadataParameterName, item.getItemMetadata(), defaultValue);
+
+        if (itemMetadataValue != null) {
+            itemMetadataValue = itemMetadataValue.toLowerCase();
+        }
 
         if (itemMetadataValue.equals(defaultValue)) {
             evaluationResult = true;
@@ -42,5 +56,20 @@ public class StringFilter extends Filter {
                     otherFilter.expectedValue.equals(this.expectedValue) &&
                     otherFilter.comparisonResult.equals(this.comparisonResult);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "{expectedValue: " + this.expectedValue +
+                ", parameterName: " + this.metadataParameterName +
+                ", comparison: " + this.comparisonResult + "}";
+    }
+
+    private String getValueForCaseInsensitiveKey(String key, JSONObject jsonObject, String defaultValue) {
+        String itemMetadataValue = jsonObject.optString(key, defaultValue);
+        if (itemMetadataValue.equals(defaultValue)) {
+            itemMetadataValue = jsonObject.optString(key.toLowerCase(), defaultValue);
+        }
+        return itemMetadataValue;
     }
 }
