@@ -200,11 +200,14 @@ public class HarvesterConfigurator {
 		FilterConfigurationFactory filterConfigurationFactory = new FilterConfigurationFactory();
 
 		if (configuration.has(ConfigurationKeys.ITEM_FILTER_CONFIGURATIONS)) {
+			logger.info("Found Item Filter criteria!");
+
 			JsonNode itemFilterConfiguration = configuration.get(ConfigurationKeys.ITEM_FILTER_CONFIGURATIONS);
 
 			HashMap configurationList = new ObjectMapper().convertValue(
 					itemFilterConfiguration, HashMap.class);
 
+			logger.info("Processing Item Filter criteria...");
 			filterConfigurationFactory.parseFilterConfigurations(new JSONObject(configurationList));
 		}
 

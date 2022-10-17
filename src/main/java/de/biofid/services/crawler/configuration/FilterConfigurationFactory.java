@@ -2,6 +2,8 @@ package de.biofid.services.crawler.configuration;
 
 import de.biofid.services.configuration.ConfigurationKeys;
 import de.biofid.services.crawler.filter.ComparisonResult;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -16,19 +18,28 @@ import java.util.List;
  */
 public class FilterConfigurationFactory {
     private final HashMap<String, List<FilterConfiguration>> filterConfigurations = new HashMap<>();
+    private static final String loggerName = "FilterConfigurationFactory";
+    private static final Logger logger = LogManager.getLogger(loggerName);
+
     public void parseFilterConfigurations(JSONObject filterConfigurations) {
         JSONObject generalSettings = (JSONObject) filterConfigurations.remove(ConfigurationKeys.GENERAL_SETTINGS);
 
         if (generalSettings != null) {
+            logger.info("Reading Filters from Section 'General'...");
             List<FilterConfiguration> generalFilterConfigurations = createHarvesterFilterConfiguration(generalSettings);
             this.filterConfigurations.put(ConfigurationKeys.GENERAL_SETTINGS, generalFilterConfigurations);
+            logger.info("Done!");
         }
 
         for (Iterator<String> it = filterConfigurations.keys(); it.hasNext(); ) {
             String harvesterKeyName = it.next();
+            logger.info("Reading Filters for Harvester '{}'...", harvesterKeyName);
+
             JSONObject configuration = filterConfigurations.getJSONObject(harvesterKeyName);
             List<FilterConfiguration> configurations = createHarvesterFilterConfiguration(configuration);
             this.filterConfigurations.put(harvesterKeyName, configurations);
+
+            logger.info("Done!");
         }
     }
 
