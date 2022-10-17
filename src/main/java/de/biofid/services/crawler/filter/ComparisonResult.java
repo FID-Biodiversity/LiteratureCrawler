@@ -8,8 +8,10 @@ import java.util.*;
 public enum ComparisonResult {
     LESS_THAN(List.of(-1), "lessthan"),
     EQUAL_LESS(List.of(-1 , 0), "equalless"),
+    LESS_EQUAL(List.of(-1, 0), "lessequal"),  // Swapped "Duplicate" for convenience in the configuration file
     EQUAL(List.of(0), "equal"),
     EQUAL_GREATER(List.of(0, 1), "equalgreater"),
+    GREATER_EQUAL(List.of(0, 1), "greaterequal"),  // Swapped "Duplicate" for convenience in the configuration file
     GREATER_THAN(List.of(1), "greaterthan"),
 
     CONTAINS(List.of(), "contains");
@@ -18,25 +20,11 @@ public enum ComparisonResult {
     private final List<Integer> value;
     private final String label;
 
-    private static final Map<Integer, List<ComparisonResult>> ENUM_VALUE_MAP;
     private static final Map<String, ComparisonResult> ENUM_LABEL_MAP;
 
     ComparisonResult(List<Integer> integerValue, String label) {
         this.value = integerValue;
         this.label = label;
-    }
-
-    // Generate a Map to look up an Enum value for a given Integer fast
-    static {
-        Map<Integer, List<ComparisonResult>> map = new HashMap<>();
-        for (ComparisonResult instance : ComparisonResult.values()) {
-            for (int v : instance.value) {
-                List<ComparisonResult> l = map.getOrDefault(v, new ArrayList<>());
-                l.add(instance);
-                map.put(v, l);
-            }
-        }
-        ENUM_VALUE_MAP = Collections.unmodifiableMap(map);
     }
 
     // Generate a Map to look up an Enum value for a given String fast

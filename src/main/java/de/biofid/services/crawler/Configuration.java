@@ -114,6 +114,7 @@ public class Configuration {
 				", isOverwrittingEnabled=" + isOverwrittingEnabled +
 				", onlyMetadata=" + onlyMetadata +
 				", jsonConfiguration=" + jsonConfiguration +
+				", filters=" + filterConfigurations +
 				'}';
 	}
 }
