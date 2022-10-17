@@ -28,7 +28,7 @@ public class StringFilter extends Filter {
         String defaultValue = null;
         boolean evaluationResult;
         String itemMetadataValue = getValueForCaseInsensitiveKey(
-                metadataParameterName, item.getItemMetadata(), defaultValue);
+                metadataParameterName, item.getDocumentMetadata(), defaultValue);
 
         if (itemMetadataValue != null) {
             itemMetadataValue = itemMetadataValue.toLowerCase();

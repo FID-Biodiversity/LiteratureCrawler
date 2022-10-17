@@ -84,7 +84,7 @@ public class ZobodatHarvester extends Harvester {
 			listOfItemsToProcess.addAll(listOfTitles);
 		}
 
-		crawlAllItems = jsonConfiguration.optBoolean(ConfigurationKeys.CRAWL_ALL_ITEMS, true);
+		crawlAllItems = jsonConfiguration.optBoolean(ConfigurationKeys.CRAWL_ALL_ITEMS, false);
 	}
 	
 	public Document getDocumentFromUrl(String url) throws IOException {
@@ -199,7 +199,7 @@ public class ZobodatHarvester extends Harvester {
 
 		boolean shallItemBeSaved = isItemInListOfPublicationsToStore(itemMetadataJSON);
 
-		item.setSaveMetadataOnly(shallItemBeSaved || configuration.isOnlyMetadata());
+		item.setSaveMetadataOnly(!shallItemBeSaved || configuration.isOnlyMetadata());
 		
 		long itemID = Long.parseLong(itemMetadataJSON.remove("id").toString());
     	logger.debug("Processing Item ID " + itemID);
@@ -207,6 +207,7 @@ public class ZobodatHarvester extends Harvester {
 		item.setItemId(itemID);
 		item.addTextFileUrl((String) itemMetadataJSON.remove("pdfUrl"), Item.FileType.PDF);
 		item.addMetdata(ITEM_COMPLETE_METADATA, itemMetadataJSON);
+		item.setDocumentMetadata(itemMetadataJSON.getJSONObject("citation"));
 	}
 
 	public boolean isItemInListOfPublicationsToStore(JSONObject itemMetadata) {

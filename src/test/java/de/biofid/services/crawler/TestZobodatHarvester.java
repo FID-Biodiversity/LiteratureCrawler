@@ -212,7 +212,7 @@ public class TestZobodatHarvester {
 
 		zobodatHarvester.addMetadataToItem(item, metadata);
 
-		assertTrue(item.getSaveMetadataOnly());
+		assertFalse(item.getSaveMetadataOnly());
 	}
 
 	@Test

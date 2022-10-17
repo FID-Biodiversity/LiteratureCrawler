@@ -2,7 +2,6 @@ package de.biofid.services.crawler.filter;
 
 import de.biofid.services.crawler.configuration.FilterConfiguration;
 
-import javax.lang.model.type.UnknownTypeException;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -35,6 +35,7 @@ public class Configuration {
 		this.isOverwrittingEnabled = conf.isOverwrittingEnabled();
 		this.delayBetweenRequestsInMilliseconds = conf.getRequestDelay();
 		this.onlyMetadata = conf.onlyMetadata;
+		this.filterConfigurations = conf.filterConfigurations;
 	}
 	
 	public Configuration(String harvesterName, String harvesterClassName, JSONObject jsonConfiguration) {

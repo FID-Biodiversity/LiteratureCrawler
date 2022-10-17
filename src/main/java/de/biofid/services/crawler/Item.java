@@ -86,6 +86,7 @@ public class Item {
 	private ArrayList<URL> textFileUrls = new ArrayList<>();
 	private ArrayList<FileType> textFileTypes = new ArrayList<>();
 	private JSONObject itemMetadata = new JSONObject();
+	private JSONObject documentMetadata = itemMetadata;
 	private HashSet<String> createdTextFiles = new HashSet<>();
 	private boolean saveMetadataOnly = true;
 
@@ -169,9 +170,19 @@ public class Item {
 	public ArrayList<FileType> getTextFileTypes() {
 		return textFileTypes;
 	}
-	
+
+	/**
+	 * Returns any non-normalized item metadata.
+	 */
 	public JSONObject getItemMetadata() {
 		return itemMetadata;
+	}
+
+	/**
+	 * Returns only Metadata like author(s), publication year etc.
+	 */
+	public JSONObject getDocumentMetadata() {
+		return documentMetadata;
 	}
 
 	public boolean getSaveMetadataOnly() {
@@ -202,6 +213,10 @@ public class Item {
 
 	public void setSaveMetadataOnly(boolean toSave) {
 		this.saveMetadataOnly = toSave;
+	}
+
+	public void setDocumentMetadata(JSONObject documentMetadata) {
+		this.documentMetadata = documentMetadata;
 	}
 	
 	public Path writeMetadataFile(String outputDirectory, FileType outputFormat) 

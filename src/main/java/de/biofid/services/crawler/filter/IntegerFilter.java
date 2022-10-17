@@ -23,7 +23,7 @@ public class IntegerFilter extends Filter {
         int defaultValue = -99999;
         boolean evaluationResult;
         int itemMetadataValue = getValueForCaseInsensitiveKey(
-                metadataParameterName, item.getItemMetadata(), defaultValue);
+                metadataParameterName, item.getDocumentMetadata(), defaultValue);
 
         if (itemMetadataValue == defaultValue) {
             evaluationResult = true;

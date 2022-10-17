@@ -18,4 +18,11 @@ public class FilterConfiguration {
         this.metadataParameterName = metadataParameterName;
         this.comparisonResult = comparisonResult;
     }
+
+    public String toString() {
+        return "Filter for valueType '" + valueType + "'" +
+                ", expectedValue: " + expectedValue +
+                ", metadataParameterName" + metadataParameterName +
+                ", comparisonResult" + comparisonResult;
+    }
 }

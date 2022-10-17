@@ -1,18 +1,22 @@
 package de.biofid.services.crawler;
 
 import de.biofid.services.crawler.zobodat.ZobodatHarvester;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestLiteratureHarvester {
-	
+	@TempDir
+	public Path testOutputDirectory;
 	private static final String ITEM_ARRAY = "items";
 	private static final String TITLE_ARRAY = "titles";
 	
@@ -70,6 +74,27 @@ public class TestLiteratureHarvester {
 		item = new Item();
 		item.addMetdata("year", 1900);
 		assertTrue(instantiatedHarvester.isItemValid(item));
+	}
+
+	@Test
+	public void testNoFilteredItemIsProcessed() throws IOException {
+		testOutputDirectory = Paths.get("/tmp/harvester");
+
+		try {
+			Harvester.setOutputDirectory(testOutputDirectory.toString());
+			String configurationFilePath = "src/test/resources/configurations/filtered-zobodat-config.yml";
+			LiteratureHarvester.CONFIGURATION_FILE_PATH_STRING = configurationFilePath;
+			literatureHarvester = new LiteratureHarvester();
+			literatureHarvester.start();
+
+			Path fileThatShouldExist = testOutputDirectory.resolve("zobodat/text/pdf/501285.pdf");
+			assertTrue(fileThatShouldExist.toFile().exists());
+
+			Path fileThatShouldNotExist = testOutputDirectory.resolve("zobodat/text/pdf/483244.pdf");
+			assertFalse(fileThatShouldNotExist.toFile().exists());
+		} finally {
+			FileUtils.deleteDirectory(testOutputDirectory.toFile());
+		}
 	}
 
 	@BeforeEach
