@@ -1,0 +1,18 @@
+General:
+  output-path: /tmp/harvester
+  overwrite: true
+  request-delay: 100
+
+ItemFilter:
+  General:
+    Year:
+      GreaterThan:
+        2020
+      strict: true
+
+Harvesters:
+  - Zobodat:
+      class: de.biofid.services.crawler.zobodat.ZobodatHarvester
+      overwrite: false
+      metadata-only: false
+      titles: ["6963"]

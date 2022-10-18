@@ -103,6 +103,23 @@ public abstract class Harvester {
 		}
 	}
 
+	/**
+	 * Checks, if a given {@link Item} agrees with all configured {@link Filter}s.
+	 * @param item The {@link Item} object to check.
+	 * @return True, if the {@link Item} complies with all filters. False, otherwise.
+	 */
+	public boolean isItemValid(Item item) {
+		for (Filter filter : filters) {
+			if (!filter.isItemValid(item)) {
+				logger.debug("The metadata of Item {} did not comply with filter {} from Harvester {}",
+						item.getItemId(), filter, this.getClass().getName());
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	public Item createNewEmptyItem() {
 		return new Item();
 	}
@@ -149,23 +166,6 @@ public abstract class Harvester {
 		ObjectMapper mapper = new ObjectMapper();
 		String metdataJSONString = mapper.writeValueAsString(obj);
 		return new JSONObject(metdataJSONString);
-	}
-
-	/**
-	 * Checks, if a given {@link Item} agrees with all configured {@link Filter}s.
-	 * @param item The {@link Item} object to check.
-	 * @return True, if the {@link Item} complies with all filters. False, otherwise.
-	 */
-	protected boolean isItemValid(Item item) {
-		for (Filter filter : filters) {
-			if (!filter.isItemValid(item)) {
-				logger.debug("The metadata of Item {} did not comply with filter {} from Harvester {}",
-						item.getItemId(), filter, this.getClass().getName());
-				return false;
-			}
-		}
-
-		return true;
 	}
 	
 	private boolean createDirectoryIfNotExisting(Path pathToCreate) {

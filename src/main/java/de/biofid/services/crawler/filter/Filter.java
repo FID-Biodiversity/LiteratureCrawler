@@ -1,11 +1,18 @@
 package de.biofid.services.crawler.filter;
 
 import de.biofid.services.crawler.Item;
+import de.biofid.services.crawler.configuration.FilterConfiguration;
 
 /**
  * A Filter object holds information/conditions if an Item should be removed.
  */
 abstract public class Filter {
+
+    protected boolean isStrict;
+
+    Filter(FilterConfiguration configuration) {
+        isStrict = configuration.isStrict;
+    }
 
     /**
      * Evaluates an Item object.

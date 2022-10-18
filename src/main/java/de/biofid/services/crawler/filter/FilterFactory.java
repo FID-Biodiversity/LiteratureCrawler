@@ -34,19 +34,11 @@ public class FilterFactory {
     }
 
     private static Filter createIntegerFilter(FilterConfiguration configuration) {
-        return new IntegerFilter(
-                configuration.metadataParameterName,
-                (int) configuration.expectedValue,
-                configuration.comparisonResult
-        );
+        return new IntegerFilter(configuration);
     }
 
     private static Filter createStringFilter(FilterConfiguration configuration) {
-        return new StringFilter(
-                configuration.metadataParameterName,
-                (String) configuration.expectedValue,
-                configuration.comparisonResult
-        );
+        return new StringFilter(configuration);
     }
 
     public static class UnsupportedFilterTypeException extends Exception {

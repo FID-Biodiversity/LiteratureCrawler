@@ -1,9 +1,7 @@
 package de.biofid.services.crawler;
 
-import de.biofid.services.crawler.zobodat.ZobodatHarvester;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -30,50 +28,6 @@ public class TestLiteratureHarvester {
 		Configuration configuration = configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING);
 		Harvester instantiatedHarvester = literatureHarvester.instantiateHarvester(configuration);
 		assertEquals("BHL", instantiatedHarvester.getFolderName());
-	}
-
-	@Test
-	public void testItemFilteringWithStringFilter() throws IOException {
-		Harvester.setOutputDirectory("path/to/output");
-		String configurationFilePath = "src/test/resources/configurations/item-filter-config.yml";
-		LiteratureHarvester.CONFIGURATION_FILE_PATH_STRING = configurationFilePath;
-		literatureHarvester = new LiteratureHarvester();
-
-		configurator = getConfigurator(configurationFilePath);
-		Configuration configuration = configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING);
-		Harvester instantiatedHarvester = literatureHarvester.instantiateHarvester(configuration);
-
-		Item item = new Item();
-		item.addMetdata("Title", "About Birds!");
-		assertFalse(instantiatedHarvester.isItemValid(item));
-
-		item = new Item();
-		item.addMetdata("Title", "A Story about Testing");
-		assertTrue(instantiatedHarvester.isItemValid(item));
-	}
-
-	@Test
-	public void testItemFilteringWithIntegerFilter() throws IOException {
-		Harvester.setOutputDirectory("path/to/output");
-		String configurationFilePath = "src/test/resources/configurations/item-filter-config.yml";
-		LiteratureHarvester.CONFIGURATION_FILE_PATH_STRING = configurationFilePath;
-		literatureHarvester = new LiteratureHarvester();
-
-		configurator = getConfigurator(configurationFilePath);
-		Configuration configuration = configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING);
-		Harvester instantiatedHarvester = literatureHarvester.instantiateHarvester(configuration);
-
-		Item item = new Item();
-		item.addMetdata("year", 1924);
-		assertFalse(instantiatedHarvester.isItemValid(item));
-
-		item = new Item();
-		item.addMetdata("year", 1923);
-		assertTrue(instantiatedHarvester.isItemValid(item));
-
-		item = new Item();
-		item.addMetdata("year", 1900);
-		assertTrue(instantiatedHarvester.isItemValid(item));
 	}
 
 	@Test

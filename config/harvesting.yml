@@ -12,7 +12,40 @@ General:
    
    # Delay between requests to an API in milliseconds; Default: 0
    request-delay: 100
-   
+
+
+ItemFilter:
+  # The ItemFilter section is completely optional.
+  # It allows setting filter criteria for all Harvesters (in the section "General") or for a specific harvester
+  # (referring its name as given in the "Harvester" section below). If both is given, a "General" filter and a specific
+  # filter for a harvester, only (!) the filters of the specified harvester apply!
+
+  # Checks an Item object's citation for filter criteria
+  General:
+    # A filter criteria can be applied to ALL Harvesters, putting it in the "General" section.
+    Year:
+      # Filter for publication year. The parameter name (in this case "Year") is the parameter in the item that will
+      # be evaluated. The name is case-insensitive.
+      EqualLess:
+        # Allowed (case-insensitive) keywords for integer comparisons are
+        # "LessThan", "EqualLess", "Equal", "EqualGreater", "Greater".
+        # The parameter type is deduced automatically.
+        1923
+      strict:
+        # The default behaviour of filters is to pass an item, if it does not provide the requested parameter (in this
+        # case "Year").
+        # The "strict" parameter is disabled ("false") per default and is optional. If set "true", the requested
+        # parameter has to be given in each item. If an item cannot provide the requested parameter, it will be
+        # filtered out.
+        true
+  BHL:
+    # A filter for a specific Harvester can be stated by using the Harvester's name.
+    # More general filters (i.e. from the "General" section) will all(!) be overwritten.
+    Title:
+      contains:
+        # For string comparisons "Equal" or "Contains" can be given as comparison keywords.
+        "test"
+
 
 # Configure additional Harvesters below after implementing them.
 # Every Harvester needs to have a unique name. Also, it needs to provide a "class", so

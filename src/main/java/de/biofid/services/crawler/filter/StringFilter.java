@@ -1,6 +1,7 @@
 package de.biofid.services.crawler.filter;
 
 import de.biofid.services.crawler.Item;
+import de.biofid.services.crawler.configuration.FilterConfiguration;
 import org.json.JSONObject;
 
 /**
@@ -17,10 +18,12 @@ public class StringFilter extends Filter {
     private final String metadataParameterName;
     private final ComparisonResult comparisonResult;
 
-    public StringFilter(String metadataParameterName, String expectedValue, ComparisonResult comparisonResult) {
-        this.expectedValue = expectedValue;
-        this.metadataParameterName = metadataParameterName;
-        this.comparisonResult = comparisonResult;
+    public StringFilter(FilterConfiguration filterConfiguration) {
+        super(filterConfiguration);
+
+        this.expectedValue = (String) filterConfiguration.expectedValue;
+        this.metadataParameterName = filterConfiguration.metadataParameterName;
+        this.comparisonResult = filterConfiguration.comparisonResult;
     }
 
     @Override

@@ -10,19 +10,22 @@ public class FilterConfiguration {
     public Object expectedValue;
     public String metadataParameterName;
     public ComparisonResult comparisonResult;
+    public boolean isStrict;
 
-    FilterConfiguration(Object valueType, String metadataParameterName, Object expectedValue,
-                        ComparisonResult comparisonResult) {
+    public FilterConfiguration(Object valueType, String metadataParameterName, Object expectedValue,
+                        ComparisonResult comparisonResult, boolean isStrict) {
         this.valueType = valueType;
         this.expectedValue = expectedValue;
         this.metadataParameterName = metadataParameterName;
         this.comparisonResult = comparisonResult;
+        this.isStrict = isStrict;
     }
 
     public String toString() {
         return "Filter for valueType '" + valueType + "'" +
                 ", expectedValue: " + expectedValue +
-                ", metadataParameterName" + metadataParameterName +
-                ", comparisonResult" + comparisonResult;
+                ", metadataParameterName: " + metadataParameterName +
+                ", comparisonResult: " + comparisonResult +
+                ", isStrict: " + isStrict;
     }
 }

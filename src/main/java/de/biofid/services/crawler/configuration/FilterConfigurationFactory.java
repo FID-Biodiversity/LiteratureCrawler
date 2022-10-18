@@ -2,6 +2,7 @@ package de.biofid.services.crawler.configuration;
 
 import de.biofid.services.configuration.ConfigurationKeys;
 import de.biofid.services.crawler.filter.ComparisonResult;
+import de.biofid.services.crawler.filter.FilterConfigurationKeys;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -64,13 +65,20 @@ public class FilterConfigurationFactory {
         for (Iterator<String> it = configuration.keys(); it.hasNext(); ) {
             String parameterName = it.next();
             JSONObject condition = configuration.getJSONObject(parameterName);
+
+            boolean isStrict = false;
+            if (condition.has(FilterConfigurationKeys.IS_FILTER_STRICT)) {
+                isStrict = (boolean) condition.remove(FilterConfigurationKeys.IS_FILTER_STRICT);
+            }
+
             String conditionName = condition.keys().next();
             Object expectedValue = condition.get(conditionName);
             Object valueType = expectedValue.getClass();
             ComparisonResult comparisonResult = ComparisonResult.fromString(conditionName);
 
+
             FilterConfiguration filterConfiguration = new FilterConfiguration(
-                    valueType, parameterName, expectedValue, comparisonResult
+                    valueType, parameterName, expectedValue, comparisonResult, isStrict
             );
 
             filterConfigurations.add(filterConfiguration);
