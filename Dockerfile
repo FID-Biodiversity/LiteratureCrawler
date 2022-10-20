@@ -10,7 +10,7 @@ USER java
 
 WORKDIR /usr/src/literature-crawler
 
-COPY . .
+COPY --chown=java . ./
 
 RUN mvn package -Dcom.sun.security.enableAIAcaIssuers=true
 
