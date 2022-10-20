@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
  * @version 1.0
  */
 public class Citation {
+	public static final int integerDefault = -99999;
+
 	private static final Pattern pattern = Pattern.compile("^[0-9]{4}");
 	
 	private List<String> authors = new ArrayList<>();
@@ -21,7 +23,7 @@ public class Citation {
 	private String journalName = "";
 	private String lastPage = "";
 	private String title = "";
-	private int year = -1;
+	private int year = integerDefault;
 	
 	public void addAuthor(String author) {
 		if (author == null) {

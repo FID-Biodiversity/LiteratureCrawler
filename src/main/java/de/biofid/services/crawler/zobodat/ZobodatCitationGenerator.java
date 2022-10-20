@@ -67,7 +67,16 @@ public class ZobodatCitationGenerator {
             for (String author : authorsString.split(",")) {
                 addAuthor(citation, createMetadataElementFromHtmlElement(author));
             }
-            citation.year = Integer.parseInt(authorAndYearMatcher.group(2));
+            int year = Integer.parseInt(authorAndYearMatcher.group(ZobodatHarvester.PUBLICATION_YEAR_FIRST_YEAR));
+            if (!authorAndYearMatcher.group(ZobodatHarvester.PUBLICATION_YEAR_SECOND_YEAR).isEmpty()){
+                String yearString = authorAndYearMatcher.group(ZobodatHarvester.PUBLICATION_YEAR_SECOND_YEAR);
+
+                // The condition avoid setting a value of "05" parsed from a year "1904/05"
+                if (yearString.length() == 4) {
+                    year = Integer.parseInt(yearString);
+                }
+            }
+            citation.year = year;
         }
 
         if (citation.issueNumber.isEmpty()) {

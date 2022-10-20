@@ -1,5 +1,6 @@
 package de.biofid.services.crawler.filter;
 
+import de.biofid.services.crawler.Citation;
 import de.biofid.services.crawler.Item;
 import de.biofid.services.crawler.configuration.FilterConfiguration;
 import org.json.JSONObject;
@@ -28,7 +29,7 @@ public class IntegerFilter extends Filter {
      */
     @Override
     public boolean isItemValid(Item item) {
-        int defaultValue = -99999;
+        int defaultValue = Citation.integerDefault;
         boolean evaluationResult;
         int itemMetadataValue = getValueForCaseInsensitiveKey(
                 metadataParameterName, item.getDocumentMetadata(), defaultValue);

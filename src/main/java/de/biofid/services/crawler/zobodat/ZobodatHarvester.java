@@ -38,8 +38,11 @@ public class ZobodatHarvester extends Harvester {
 	public static final String ZOBODAT_STRING = "Zobodat";
 	
 	public static final String ATTRIBUTE_HREF = "href";
+	public static final String PUBLICATION_YEAR_FIRST_YEAR = "firstYear";
+	public static final String PUBLICATION_YEAR_SECOND_YEAR = "laterYear";
 
-	public static final Pattern REGEX_PATTERN_AUTHOR_AND_YEAR = Pattern.compile("^(.*?) ?\\(([0-9]{4})-?[0-9]{0,4}\\)");
+	public static final Pattern REGEX_PATTERN_AUTHOR_AND_YEAR = Pattern.compile("^(\\D*?) ?\\((?<" + PUBLICATION_YEAR_FIRST_YEAR +
+			">[0-9]{4})[-\\/]?(?<" + PUBLICATION_YEAR_SECOND_YEAR +">[0-9]{0,4})\\)");
 	public static final Pattern REGEX_PATTERN_ISSUE_NUMBER = Pattern.compile("– ([^–]*?): ");
 	public static final Pattern REGEX_PATTERN_ITEM_ID_IN_ZOBODAT_URL = Pattern.compile("\\?id=([0-9]*)");
 	public static final Pattern REGEX_PATTERN_PAGES = Pattern.compile(": ([XI0-9]*?) - ([XI0-9]*?)\\.$");
