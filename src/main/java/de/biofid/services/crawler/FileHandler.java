@@ -3,6 +3,7 @@ package de.biofid.services.crawler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,11 +53,11 @@ public class FileHandler {
 	 */
 	public static boolean isStringPathOrFile(String pathOrFile) {
         try {
-            Paths.get(pathOrFile);
+            Path path = Paths.get(pathOrFile);
+			return path.toFile().isFile() || path.toFile().isDirectory();
         } catch (InvalidPathException | NullPointerException ex) {
             return false;
         }
-        return true;
     }
 	
 	/***
