@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -124,6 +126,21 @@ public class TestBhlHarvester {
                 configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
 
         assertTrue(bhlHarvester.getListOfItems().size() > 599);
+    }
+
+
+    @Test
+    public void testLoadingTitleListFromList() throws IOException {
+        DummyConfigurator configurator = setup();
+
+        configurator.addItemToArray(BhlHarvester.BHL_STRING, TITLE_ARRAY, "60");
+        configurator.addItemToArray(BhlHarvester.BHL_STRING, TITLE_ARRAY, "250");
+
+        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        BhlHarvester bhlHarvester = new BhlHarvester(
+                configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
+
+        assertTrue(bhlHarvester.getListOfItems().size() > 160);
     }
 
     @Test

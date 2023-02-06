@@ -408,10 +408,9 @@ public class BhlHarvester extends Harvester {
     		return getListFromFile((String) itemValue);
     	} else if (itemValue instanceof JSONArray) {
     		JSONArray jsonArray = (JSONArray) itemValue;
-    		
-    		Object firstElement = jsonArray.get(0);
-    		if (firstElement instanceof String && FileHandler.isStringPathOrFile((String) firstElement)) {
-    			return getListFromFile((String) firstElement);
+
+    		if (jsonArray.length() == 1) {
+    			return getListFromFile((String) jsonArray.get(0));
     		} else {
     			return jsonArray.toList();
     		}
