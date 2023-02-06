@@ -41,10 +41,7 @@ public class TestBibDigitalHarvester {
 		File outputMetadataFile = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + "/" + harvester.getFolderName() + 
 				"/metadata/xml/15729.xml").toFile();
 
-		// Currently (2022-10-12) the Bot. Garden of Madrid does not provide PDFs. If this is fixed,
-		// the comments below can be uncommented.
-		//assertTrue(outputTextFile.exists());
-		assertFalse(outputTextFile.exists());
+		assertTrue(outputTextFile.exists());
 		assertTrue(outputMetadataFile.exists());
 	}
 	

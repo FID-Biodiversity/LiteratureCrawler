@@ -163,10 +163,7 @@ public class TestBhlHarvester {
         Path expectedMetadataFilePath = expectedMetadataDirectory.resolve(itemID + ".xml");
         Path expectedPdfFilePath = expectedTextDirectory.resolve("pdf/" + itemID + ".pdf");
 
-        // Currently (2022-10-12) the Bot. Garden of Madrid does not provide PDFs. If this is fixed,
-        // the comments below can be uncommented.
-        //assertTrue(expectedPdfFilePath.toFile().exists());
-        assertFalse(expectedPdfFilePath.toFile().exists());
+        assertTrue(expectedPdfFilePath.toFile().exists());
         assertTrue(expectedMetadataFilePath.toFile().exists());
     }
 
@@ -208,6 +205,11 @@ public class TestBhlHarvester {
                 configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
         bhlHarvester.setBhlApiKey("th1s-4p1-k3y-1sn0t-v4l1d");
         assertThrows(AuthenticationException.class, () -> bhlHarvester.getItemMetadata(itemIdThatDoesNotExist));
+    }
+
+    @Test
+    public void testAllTextFilesAreDownloaded() throws IOException {
+
     }
 
     private DummyConfigurator getConfigurator() throws IOException {
