@@ -1,4 +1,6 @@
 FROM openjdk:11-buster
+# OpenJDK 11 LTS support until October 2024
+# https://access.redhat.com/articles/1299013
 
 RUN useradd -u 7346 --create-home java \
 	&& apt update \
