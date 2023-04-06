@@ -225,8 +225,28 @@ public class TestBhlHarvester {
     }
 
     @Test
-    public void testAllTextFilesAreDownloaded() throws IOException {
+    public void testChocrFileIsDownloaded() throws IOException {
+        DummyConfigurator configurator = setup();
 
+        int itemID = 100167;
+        configurator.addItemToArray(BhlHarvester.BHL_STRING, ITEM_ARRAY, itemID);
+
+        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        BhlHarvester bhlHarvester = new BhlHarvester(
+                configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
+
+        bhlHarvester.run();
+
+        Path expectedTextDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + TEXT_SUBDIRECTORY);
+        Path expectedMetadataDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + METADATA_SUBDIRECTORY);
+
+        Path expectedMetadataFilePath = expectedMetadataDirectory.resolve(itemID + ".xml");
+        Path expectedHocrFilePath = expectedTextDirectory.resolve("hocr/" + itemID + ".html");
+        Path expectedTxtFilePath = expectedTextDirectory.resolve("txt/" + itemID + ".txt");
+
+        assertTrue(expectedHocrFilePath.toFile().exists());
+        assertTrue(expectedMetadataFilePath.toFile().exists());
+        assertTrue(expectedTxtFilePath.toFile().exists());
     }
 
     private DummyConfigurator getConfigurator() throws IOException {

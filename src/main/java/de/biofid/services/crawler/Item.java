@@ -60,6 +60,12 @@ public class Item {
 			public String getFileSuffix() {
 				return "gz";
 			}
+		},
+		HOCR {
+			@Override
+			public String getFileSuffix() {
+				return "html";
+			}
 		};
 		
 		public abstract String getFileSuffix();
@@ -238,8 +244,7 @@ public class Item {
 		return filePath;
 	}
 	
-	public List<Path> writeTextFiles(String outputDirectory, boolean overwriteExistingFiles) 
-			throws DownloadFailedException {
+	public List<Path> writeTextFiles(String outputDirectory, boolean overwriteExistingFiles) {
 
 		if (shallOnlyMetadataBeSaved()) {
 			return Collections.emptyList();
@@ -248,6 +253,8 @@ public class Item {
 		Path outputPath = Paths.get(outputDirectory, TEXT_OUTPUT_FOLDER_NAME);
 
 		ArrayList<Path> downloadedFiles = new ArrayList<>();
+		int failedFileDownloadCount = 0;
+
 		for (int i = 0; i < textFileUrls.toArray().length; ++i) {
 			URL fileUrl = textFileUrls.get(i);
 			FileType fileType = textFileTypes.get(i);
@@ -259,10 +266,18 @@ public class Item {
 			}
 			
 			createDirectoryIfNotExisting(textFilePath.getParent());
-			
-			if (downloadFile(fileUrl, textFilePath)) {
-				downloadedFiles.add(textFilePath);
+			try {
+				if (downloadFile(fileUrl, textFilePath)) {
+					downloadedFiles.add(textFilePath);
+				}
+			} catch (DownloadFailedException ex) {
+				logger.info("Ignoring failed download! Continue processing item downloads!");
+				++failedFileDownloadCount;
 			}
+		}
+
+		if (failedFileDownloadCount == textFileUrls.size()) {
+			logger.error("All file downloads of item ID " + itemID + " failed downloading!");
 		}
 		
 		return downloadedFiles;

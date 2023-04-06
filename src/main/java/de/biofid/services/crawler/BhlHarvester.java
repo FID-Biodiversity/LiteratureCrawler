@@ -29,6 +29,8 @@ public class BhlHarvester extends Harvester {
 
     private static final String API_KEY = "apikey";
     private static final String ABBYY_OCR_FILE_NAME_SUFFIX = "_abbyy.gz";
+
+	private static final String HOCR_OCR_FILE_NAME_SUFFIX = "_hocr.html";
     
     private static final String BHL_API_URL = "https://www.biodiversitylibrary.org/api3";
 	private static final String INTERNET_ARCHIVE_DOWNLOAD_BASE_URL_STRING = "https://archive.org/download/";
@@ -358,7 +360,11 @@ public class BhlHarvester extends Harvester {
 		item.setItemUrl(itemMetadata.getString(ITEM_URL));
 		item.addTextFileUrl(itemMetadata.getString(ITEM_PDF_URL), Item.FileType.PDF);
 		item.addTextFileUrl(itemMetadata.getString(ITEM_TXT_URL), Item.FileType.TXT);
-		item.addTextFileUrl(getAbbyySourceUrl(itemMetadata), Item.FileType.ABBYY);
+
+		String internetArchiveId = itemMetadata.getString(SOURCE_IDENTIFIER);
+		item.addTextFileUrl(getAbbyySourceUrl(internetArchiveId), Item.FileType.ABBYY);
+		item.addTextFileUrl(getHocrSourceUrl(internetArchiveId), Item.FileType.HOCR);
+
 		item.addMetdata(ITEM_COMPLETE_METADATA, itemMetadata);
     }
     
@@ -391,11 +397,19 @@ public class BhlHarvester extends Harvester {
     	return itemMetadata.getString(SOURCE);
     }
     
-    private String getAbbyySourceUrl(JSONObject itemMetadata) {
-    	String internetArchiveId = itemMetadata.getString(SOURCE_IDENTIFIER);
-    	return INTERNET_ARCHIVE_DOWNLOAD_BASE_URL_STRING + internetArchiveId + "/" + 
+    private String getAbbyySourceUrl(String internetArchiveId) {
+    	return  getInternetArchiveBaseUrl(internetArchiveId) + "/" +
     			internetArchiveId + ABBYY_OCR_FILE_NAME_SUFFIX;
     }
+
+	private String getHocrSourceUrl(String internetArchiveId) {
+		return getInternetArchiveBaseUrl(internetArchiveId) + "/" +
+				internetArchiveId + HOCR_OCR_FILE_NAME_SUFFIX;
+	}
+
+	private String getInternetArchiveBaseUrl(String internetArchiveId) {
+		return INTERNET_ARCHIVE_DOWNLOAD_BASE_URL_STRING + internetArchiveId;
+	}
     
 	private List<Object> getListFromJsonKey(String jsonKey, JSONObject jsonConfiguration) {
     	if (!jsonConfiguration.has(jsonKey)) {

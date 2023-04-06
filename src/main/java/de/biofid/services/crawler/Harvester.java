@@ -204,14 +204,9 @@ public abstract class Harvester {
 		boolean overwriteExistingFiles = configuration.isOverwrittingEnabled();
 		
 		String outputPathString = outputPath.toString();
-		try {
-			item.writeTextFiles(outputPathString, overwriteExistingFiles);
-		} catch (DownloadFailedException ex) {
-			logger.error("The download of a text file from item ID {} failed!", item.getItemId());
-			logger.error(ex.getLocalizedMessage());
-			return false;
-		}
-		
+
+		item.writeTextFiles(outputPathString, overwriteExistingFiles);
+
 		try {
 			item.writeMetadataFile(outputPathString, Item.FileType.XML);
 		} catch (UnsupportedOutputFormatException ex) {
