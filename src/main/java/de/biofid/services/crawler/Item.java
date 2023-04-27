@@ -61,10 +61,10 @@ public class Item {
 				return "gz";
 			}
 		},
-		HOCR {
+		CHOCR {
 			@Override
 			public String getFileSuffix() {
-				return "html";
+				return "html.gz";
 			}
 		};
 		

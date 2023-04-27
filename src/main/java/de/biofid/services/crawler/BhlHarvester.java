@@ -30,7 +30,7 @@ public class BhlHarvester extends Harvester {
     private static final String API_KEY = "apikey";
     private static final String ABBYY_OCR_FILE_NAME_SUFFIX = "_abbyy.gz";
 
-	private static final String HOCR_OCR_FILE_NAME_SUFFIX = "_hocr.html";
+	private static final String HOCR_OCR_FILE_NAME_SUFFIX = "_chocr.html.gz";
     
     private static final String BHL_API_URL = "https://www.biodiversitylibrary.org/api3";
 	private static final String INTERNET_ARCHIVE_DOWNLOAD_BASE_URL_STRING = "https://archive.org/download/";
@@ -363,7 +363,7 @@ public class BhlHarvester extends Harvester {
 
 		String internetArchiveId = itemMetadata.getString(SOURCE_IDENTIFIER);
 		item.addTextFileUrl(getAbbyySourceUrl(internetArchiveId), Item.FileType.ABBYY);
-		item.addTextFileUrl(getHocrSourceUrl(internetArchiveId), Item.FileType.HOCR);
+		item.addTextFileUrl(getHocrSourceUrl(internetArchiveId), Item.FileType.CHOCR);
 
 		item.addMetdata(ITEM_COMPLETE_METADATA, itemMetadata);
     }

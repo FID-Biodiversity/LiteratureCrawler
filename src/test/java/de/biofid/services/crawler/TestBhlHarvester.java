@@ -241,7 +241,7 @@ public class TestBhlHarvester {
         Path expectedMetadataDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + METADATA_SUBDIRECTORY);
 
         Path expectedMetadataFilePath = expectedMetadataDirectory.resolve(itemID + ".xml");
-        Path expectedHocrFilePath = expectedTextDirectory.resolve("hocr/" + itemID + ".html");
+        Path expectedHocrFilePath = expectedTextDirectory.resolve("chocr/" + itemID + ".html.gz");
         Path expectedTxtFilePath = expectedTextDirectory.resolve("txt/" + itemID + ".txt");
 
         assertTrue(expectedHocrFilePath.toFile().exists());
