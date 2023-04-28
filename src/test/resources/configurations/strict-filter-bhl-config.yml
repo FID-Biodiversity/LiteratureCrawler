@@ -1,0 +1,20 @@
+General:
+  output-path: /tmp/harvester
+  overwrite: false
+  request-delay: 100
+
+ItemFilter:
+  General:
+    Year:
+      EqualLess:
+        1923
+      strict:
+        true
+
+Harvesters:
+  - BHL:
+      class: de.biofid.services.crawler.BhlHarvester
+      api-key: config/bhl-api-key.txt
+      overwrite: false
+      metadata-only: false
+      items: ["659"]

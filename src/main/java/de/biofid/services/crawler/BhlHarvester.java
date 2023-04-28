@@ -365,7 +365,7 @@ public class BhlHarvester extends Harvester {
 		item.addTextFileUrl(getAbbyySourceUrl(internetArchiveId), Item.FileType.ABBYY);
 		item.addTextFileUrl(getHocrSourceUrl(internetArchiveId), Item.FileType.CHOCR);
 
-		item.addMetdata(ITEM_COMPLETE_METADATA, itemMetadata);
+		item.setDocumentMetadata(itemMetadata);
     }
     
     private JSONArray getApiResultArray(JSONObject apiResponse) 

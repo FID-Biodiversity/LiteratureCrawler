@@ -111,7 +111,7 @@ public class BibDigitalHarvester extends Harvester {
 		item.setItemId(itemID);
 	
 		try {
-			item.addMetdata(ITEM_COMPLETE_METADATA, toJsonObject(itemMetadata));
+			item.setDocumentMetadata(toJsonObject(itemMetadata));
 		} catch (JsonProcessingException ex) {
 			logger.warn("Could not write metadata for item ID {}\n{}", itemID, ex.getLocalizedMessage());
 		}
