@@ -4,21 +4,20 @@ import de.biofid.services.crawler.metadata.Citation;
 import de.biofid.services.crawler.metadata.Metadata;
 import de.biofid.services.crawler.metadata.MetadataElement;
 import de.biofid.services.crawler.zobodat.ZobodatHarvester;
-import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,11 +37,6 @@ public class TestZobodatHarvester {
 	
 	private static final String METADATA_CITATION = "citation";
 	private static final String METADATA_PDF_URL = "pdfUrl";
-	
-	private static final String TEST_OUTPUT_DIRECTORY_STRING = "/tmp/test";
-	
-	private boolean didTestDirectoryExistBeforeTest = true;
-	private File testDirectory = null;
 
 	@Test
 	public void testZobodatInstantiation() throws MalformedURLException {
@@ -82,8 +76,8 @@ public class TestZobodatHarvester {
 	}
 
 	@Test
-	public void testFetchingItemListDirectly() throws IOException {
-		DummyConfigurator configurator = setup();
+	public void testFetchingItemListDirectly(@TempDir Path tempDir) throws IOException {
+		DummyConfigurator configurator = setup(tempDir);
 		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
 				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
 		Document zobodatHtml = loadDocumentHtml("src/test/resources/html/zobodatIndex.html");
@@ -131,9 +125,9 @@ public class TestZobodatHarvester {
 	}
 	
 	@Test
-	public void testFetchingItemListsFromJournalOverviewSite() throws IOException {
+	public void testFetchingItemListsFromJournalOverviewSite(@TempDir Path tempDir) throws IOException {
 		// Uses data from https://www.zobodat.at/publikation_series.php?id=20987 ; Accessed 2021-06-10
-		DummyConfigurator configurator = setup();
+		DummyConfigurator configurator = setup(tempDir);
 		
 		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
 				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
@@ -145,8 +139,8 @@ public class TestZobodatHarvester {
 	}
 
 	@Test
-	public void testGetEmptyCitationFromUrl() throws Exception {
-		DummyConfigurator configurator = setup();
+	public void testGetEmptyCitationFromUrl(@TempDir Path tempDir) throws Exception {
+		DummyConfigurator configurator = setup(tempDir);
 		String startingUrl = "https://www.zobodat.at/foo";
 		Document emptyCitationHtml = loadDocumentHtml("src/test/resources/html/zobodat/citations/emptyCitationContainer.html");
 
@@ -159,8 +153,8 @@ public class TestZobodatHarvester {
 	}
 
 	@Test
-	public void testMakeItemDownloadable() throws IOException {
-		DummyConfigurator configurator = setup();
+	public void testMakeItemDownloadable(@TempDir Path tempDir) throws IOException {
+		DummyConfigurator configurator = setup(tempDir);
 		configurator.addItemToArray(ZobodatHarvester.ZOBODAT_STRING, "titles", 7392);
 
 		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
@@ -191,13 +185,6 @@ public class TestZobodatHarvester {
 		assertTrue(itemCitation.has(CITATION_JOURNAL_NAME));
 	}
 	
-	@AfterEach
-	public void cleanAfterTest() throws IOException {
-		if (!didTestDirectoryExistBeforeTest && testDirectory.exists()) {
-			FileUtils.deleteDirectory(testDirectory);
-		}
-	}
-	
 	private DummyConfigurator getConfigurator() throws IOException {
 		String configurationFilePathString = "src/test/resources/configurations/test-config.yml";
 		
@@ -210,11 +197,8 @@ public class TestZobodatHarvester {
 		return configurator;
 	}
 	
-	private DummyConfigurator setup() throws IOException {
-		Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
-		
-		testDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING).toFile();
-		didTestDirectoryExistBeforeTest = testDirectory.exists();
+	private DummyConfigurator setup(Path tempDir) throws IOException {
+		Harvester.setOutputDirectory(tempDir.toString());
 		
 		return getConfigurator();
 	}

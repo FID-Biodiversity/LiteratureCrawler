@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -19,6 +21,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  * @author Adrian Pachzelt (University Library Johann Christian Senckenberg, Frankfurt)
  * @author https://www.biofid.de
  * @version 1.0
+ *
+ * Its Metadata objects have a slightly different JSON serialization behaviour, because they
+ * skip some properties that would otherwise be serialized to JSON.
  */
 public class BibDigitalHarvester extends Harvester {
 	public static final String BIB_DIGITAL_HARVESTER = "bib-digital-madrid";
@@ -111,7 +116,10 @@ public class BibDigitalHarvester extends Harvester {
 		item.setItemId(itemID);
 	
 		try {
-			item.setDocumentMetadata(toJsonObject(itemMetadata));
+			item.setItemUrl(itemMetadata.getItemUrl());
+
+			// Make sure only the citation is returned
+			item.setDocumentMetadata(toJsonObject(itemMetadata).getJSONObject("citation"));
 		} catch (JsonProcessingException ex) {
 			logger.warn("Could not write metadata for item ID {}\n{}", itemID, ex.getLocalizedMessage());
 		}
@@ -140,7 +148,7 @@ public class BibDigitalHarvester extends Harvester {
 		citation.setTitle(itemTitle);
 		citation.addAuthor(itemAuthor);
 		citation.setPublicationYear(itemPublicationDate);
-		
+
 		return new Metadata(itemId, pdfUrl, citation);
 	}
 	
@@ -202,9 +210,7 @@ public class BibDigitalHarvester extends Harvester {
 		return document.getElementsByTag(TAG_NAME_CONTAINING_METADATA);
 	}
 	
-	private class BibDigitalCitation extends Citation {
-		
-	}
+	private class BibDigitalCitation extends Citation {}
 	
 	private class PdfNotAvailableException extends IOException {
 		private static final long serialVersionUID = 7269829332901886792L;

@@ -1,5 +1,7 @@
 package de.biofid.services.crawler;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -13,6 +15,9 @@ import java.util.regex.Pattern;
  * @version 1.0
  */
 public class Citation {
+
+	// This name makes it consistent with the BHL naming of the same parameter
+	public static final String SERIALIZATION_NAME_ITEM_PUBLICATION_YEAR = "year";
 	public static final int integerDefault = -99999;
 
 	private static final Pattern pattern = Pattern.compile("^[0-9]{4}");
@@ -59,7 +64,8 @@ public class Citation {
 	public String getLastPage() {
 		return lastPage;
 	}
-	
+
+	@JsonProperty("Year")
 	public int getPublicationYear() {
 		return year;
 	}

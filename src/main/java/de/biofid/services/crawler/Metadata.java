@@ -16,10 +16,10 @@ public class Metadata {
 	
 	public static final String SERIALIZATION_NAME_ITEM_URL = "url";
 	
-	private Citation citation;
-	private long id;
-	private URL itemUrl;
-	private URL pdfUrl;
+	protected Citation citation;
+	protected long id;
+	protected URL itemUrl;
+	protected URL pdfUrl;
 	
 	public Metadata(long id, URL pdfUrl, Citation citation) {
 		this.pdfUrl = pdfUrl;
@@ -30,7 +30,7 @@ public class Metadata {
 	public Citation getCitation() {
 		return citation;
 	}
-	
+
 	public long getItemID() {
 		return id;
 	}

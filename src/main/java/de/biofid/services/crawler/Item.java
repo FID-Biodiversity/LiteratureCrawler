@@ -155,6 +155,7 @@ public class Item {
 		this.textFileTypes = other.getTextFileTypes();
 		this.textFileUrls = other.getTextFileUrls();
 		this.itemMetadata = other.getItemMetadata();
+		this.documentMetadata = other.getDocumentMetadata();
 	}
 	
 	public void setDataSource(String dataSource) {

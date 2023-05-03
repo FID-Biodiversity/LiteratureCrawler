@@ -3,19 +3,16 @@ package de.biofid.services.crawler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.biofid.services.crawler.BhlHarvester.ItemDoesNotExistException;
-import org.apache.commons.io.FileUtils;
 import org.apache.http.auth.AuthenticationException;
 import org.json.JSONObject;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -24,29 +21,25 @@ import static org.mockito.ArgumentMatchers.any;
 
 public class TestBhlHarvester {
 
-    private static final String TEST_OUTPUT_DIRECTORY_STRING = "/tmp/test";
-    private boolean didTestDirectoryExistBeforeTest = true;
-    private final File testDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING).toFile();
-
     private static final String ITEM_ARRAY = "items";
     private static final String TITLE_ARRAY = "titles";
     private static final String METADATA_SUBDIRECTORY = "/bhl/metadata/xml";
     private static final String TEXT_SUBDIRECTORY = "/bhl/text";
 
     @Test
-    public void testGetAllCollections() throws IOException {
+    public void testGetAllCollections(@TempDir Path tempDir) throws IOException {
         DummyConfigurator configurator = setup();
         BhlHarvester bhlHarvesterSpy = prepareMockApiDataAndGetHarvesterSpy(configurator,
-                "src/test/resources/bhl/apiResponses/getCollections.json");
+                "src/test/resources/bhl/apiResponses/getCollections.json", tempDir.toFile());
 
         Map<Long, JSONObject> collectionMap = bhlHarvesterSpy.getAllCollections();
         assertEquals(59, collectionMap.size());
     }
 
     @Test
-    public void testGetItemMetadata() throws IOException, AuthenticationException {
+    public void testGetItemMetadata(@TempDir Path tempDir) throws IOException, AuthenticationException {
         DummyConfigurator configurator = setup();
-        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        Harvester.setOutputDirectory(tempDir.toString());
         int itemId = 22497;
 
         configurator.addItemToArray(BhlHarvester.BHL_STRING, ITEM_ARRAY, itemId);
@@ -61,21 +54,22 @@ public class TestBhlHarvester {
     }
 
     @Test
-    public void testHarvestSingleElement() throws Exception {
+    public void testHarvestSingleElement(@TempDir Path tempDir) throws Exception {
         DummyConfigurator configurator = setup();
 
         long itemID = 22314;
 
         configurator.addItemToArray(BhlHarvester.BHL_STRING, ITEM_ARRAY, itemID);
 
-        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        String tempDirPathString = tempDir.toString();
+        Harvester.setOutputDirectory(tempDirPathString);
         BhlHarvester bhlHarvester = new BhlHarvester(
                 configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
 
         bhlHarvester.run();
 
-        Path expectedTextDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + TEXT_SUBDIRECTORY);
-        Path expectedMetadataDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + METADATA_SUBDIRECTORY);
+        Path expectedTextDirectory = Paths.get(tempDirPathString + TEXT_SUBDIRECTORY);
+        Path expectedMetadataDirectory = Paths.get(tempDirPathString + METADATA_SUBDIRECTORY);
 
         Path expectedMetadataFilePath = expectedMetadataDirectory.resolve(itemID + ".xml");
         Path expectedPdfFilePath = expectedTextDirectory.resolve("pdf/" + itemID + ".pdf");
@@ -87,21 +81,22 @@ public class TestBhlHarvester {
     }
 
     @Test
-    public void testHarvestMultipleElements() throws Exception {
+    public void testHarvestMultipleElements(@TempDir Path tempDir) throws Exception {
         DummyConfigurator configurator = setup();
 
         long[] itemIDArray = {22314, 122748};
         configurator.addItemToArray(BhlHarvester.BHL_STRING, ITEM_ARRAY, itemIDArray[0]);
         configurator.addItemToArray(BhlHarvester.BHL_STRING, ITEM_ARRAY, itemIDArray[1]);
 
-        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        String tempDirPathString = tempDir.toString();
+        Harvester.setOutputDirectory(tempDirPathString);
         BhlHarvester bhlHarvester = new BhlHarvester(
                 configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
 
         bhlHarvester.run();
 
-        Path expectedTextDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + TEXT_SUBDIRECTORY);
-        Path expectedMetadataDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + METADATA_SUBDIRECTORY);
+        Path expectedTextDirectory = Paths.get(tempDirPathString + TEXT_SUBDIRECTORY);
+        Path expectedMetadataDirectory = Paths.get(tempDirPathString + METADATA_SUBDIRECTORY);
 
         for (long itemID : itemIDArray) {
             Path expectedMetadataFilePath = expectedMetadataDirectory.resolve(itemID + ".xml");
@@ -115,13 +110,14 @@ public class TestBhlHarvester {
     }
 
     @Test
-    public void testLoadingTitleListFromFile() throws IOException {
+    public void testLoadingTitleListFromFile(@TempDir Path tempDir) throws IOException {
         DummyConfigurator configurator = setup();
 
         String dummyFilePath = "src/test/resources/listOfTitles.txt";
         configurator.addItemToArray(BhlHarvester.BHL_STRING, TITLE_ARRAY, dummyFilePath);
 
-        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        String tempDirPathString = tempDir.toString();
+        Harvester.setOutputDirectory(tempDirPathString);
         BhlHarvester bhlHarvester = new BhlHarvester(
                 configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
 
@@ -130,13 +126,14 @@ public class TestBhlHarvester {
 
 
     @Test
-    public void testLoadingTitleListFromList() throws IOException {
+    public void testLoadingTitleListFromList(@TempDir Path tempDir) throws IOException {
         DummyConfigurator configurator = setup();
 
         configurator.addItemToArray(BhlHarvester.BHL_STRING, TITLE_ARRAY, "60");
         configurator.addItemToArray(BhlHarvester.BHL_STRING, TITLE_ARRAY, "250");
 
-        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        String tempDirPathString = tempDir.toString();
+        Harvester.setOutputDirectory(tempDirPathString);
         BhlHarvester bhlHarvester = new BhlHarvester(
                 configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
 
@@ -144,13 +141,14 @@ public class TestBhlHarvester {
     }
 
     @Test
-    public void testHarvestTitles() throws Exception {
+    public void testHarvestTitles(@TempDir Path tempDir) throws Exception {
         DummyConfigurator configurator = setup();
 
         long titleID = 155962;
         long[] itemsIncludedInTitles = {261598, 261814};
 
-        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        String tempDirPathString = tempDir.toString();
+        Harvester.setOutputDirectory(tempDirPathString);
         BhlHarvester bhlHarvester = new BhlHarvester(
                 configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
 
@@ -162,20 +160,21 @@ public class TestBhlHarvester {
     }
 
     @Test
-    public void testExternalResourceAccess() throws IOException {
+    public void testExternalResourceAccess(@TempDir Path tempDir) throws IOException {
         DummyConfigurator configurator = setup();
 
         long itemID = 147893;
         configurator.addItemToArray(BhlHarvester.BHL_STRING, ITEM_ARRAY, itemID);
 
-        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        String tempDirPathString = tempDir.toString();
+        Harvester.setOutputDirectory(tempDirPathString);
         BhlHarvester bhlHarvester = new BhlHarvester(
                 configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
 
         bhlHarvester.run();
 
-        Path expectedTextDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + TEXT_SUBDIRECTORY);
-        Path expectedMetadataDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + METADATA_SUBDIRECTORY);
+        Path expectedTextDirectory = Paths.get(tempDirPathString + TEXT_SUBDIRECTORY);
+        Path expectedMetadataDirectory = Paths.get(tempDirPathString + METADATA_SUBDIRECTORY);
 
         Path expectedMetadataFilePath = expectedMetadataDirectory.resolve(itemID + ".xml");
         Path expectedPdfFilePath = expectedTextDirectory.resolve("pdf/" + itemID + ".pdf");
@@ -195,10 +194,11 @@ public class TestBhlHarvester {
     }
 
     @Test
-    public void testItemDoesNotExistException()
+    public void testItemDoesNotExistException(@TempDir Path tempDir)
             throws IOException {
         DummyConfigurator configurator = setup();
-        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        String tempDirPathString = tempDir.toString();
+        Harvester.setOutputDirectory(tempDirPathString);
         long itemIdThatDoesNotExist = 1;
 
         configurator.addItemToArray(BhlHarvester.BHL_STRING, ITEM_ARRAY, itemIdThatDoesNotExist);
@@ -210,10 +210,11 @@ public class TestBhlHarvester {
     }
 
     @Test
-    public void testInvalidAuthorizationException()
+    public void testInvalidAuthorizationException(@TempDir Path tempDir)
             throws IOException {
         DummyConfigurator configurator = setup();
-        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        String tempDirPathString = tempDir.toString();
+        Harvester.setOutputDirectory(tempDirPathString);
         long itemIdThatDoesNotExist = 1;
 
         configurator.addItemToArray(BhlHarvester.BHL_STRING, ITEM_ARRAY, itemIdThatDoesNotExist);
@@ -225,20 +226,21 @@ public class TestBhlHarvester {
     }
 
     @Test
-    public void testChocrFileIsDownloaded() throws IOException {
+    public void testChocrFileIsDownloaded(@TempDir Path tempDir) throws IOException {
         DummyConfigurator configurator = setup();
 
         int itemID = 100167;
         configurator.addItemToArray(BhlHarvester.BHL_STRING, ITEM_ARRAY, itemID);
 
-        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+        String tempDirPathString = tempDir.toString();
+        Harvester.setOutputDirectory(tempDirPathString);
         BhlHarvester bhlHarvester = new BhlHarvester(
                 configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
 
         bhlHarvester.run();
 
-        Path expectedTextDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + TEXT_SUBDIRECTORY);
-        Path expectedMetadataDirectory = Paths.get(TEST_OUTPUT_DIRECTORY_STRING + METADATA_SUBDIRECTORY);
+        Path expectedTextDirectory = Paths.get(tempDirPathString + TEXT_SUBDIRECTORY);
+        Path expectedMetadataDirectory = Paths.get(tempDirPathString + METADATA_SUBDIRECTORY);
 
         Path expectedMetadataFilePath = expectedMetadataDirectory.resolve(itemID + ".xml");
         Path expectedHocrFilePath = expectedTextDirectory.resolve("chocr/" + itemID + ".html.gz");
@@ -263,8 +265,6 @@ public class TestBhlHarvester {
     }
 
     private DummyConfigurator setup() throws IOException {
-        didTestDirectoryExistBeforeTest = testDirectory.exists();
-
         return getConfigurator();
     }
 
@@ -277,8 +277,10 @@ public class TestBhlHarvester {
         return new JSONObject(data);
     }
 
-    private BhlHarvester prepareMockApiDataAndGetHarvesterSpy(HarvesterConfigurator configurator, String filePath) throws IOException {
-        Harvester.setOutputDirectory(TEST_OUTPUT_DIRECTORY_STRING);
+    private BhlHarvester prepareMockApiDataAndGetHarvesterSpy(HarvesterConfigurator configurator,
+                                                              String filePath,
+                                                              File outputDir) throws IOException {
+        Harvester.setOutputDirectory(outputDir.toString());
         BhlHarvester bhlHarvester = new BhlHarvester(
                 configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING));
         JSONObject apiResponse = loadApiResponse(filePath);
@@ -287,12 +289,5 @@ public class TestBhlHarvester {
         Mockito.doReturn(apiResponse).when(bhlHarvesterSpy).getFromBhlApi(any());
 
         return bhlHarvesterSpy;
-    }
-
-    @AfterEach
-    public void cleanAfterTest() throws IOException {
-        if (!didTestDirectoryExistBeforeTest && testDirectory.exists()) {
-            FileUtils.deleteDirectory(testDirectory);
-        }
     }
 }
