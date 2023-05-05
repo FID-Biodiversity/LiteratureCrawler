@@ -70,6 +70,12 @@ public class Item {
 		
 		public abstract String getFileSuffix();
 	}
+
+	public enum CopyrightStatus {
+		NOT_IN_COPYRIGHT,
+		IN_COPYRIGHT,
+		CREATIVE_COMMONS_LICENSE
+	}
 	
 	public static String TEXT_OUTPUT_FOLDER_NAME = "text";
 	public static String METADATA_OUTPUT_FOLDER_NAME = "metadata";
@@ -168,6 +174,30 @@ public class Item {
 	
 	public URL getUrl() {
 		return itemUrl;
+	}
+
+	public CopyrightStatus getCopyrightStatus() {
+		JSONObject documentMetadata = getDocumentMetadata();
+
+		String copyrightStatusKey = "CopyrightStatus";
+		String licenseUrlKey = "LicenseUrl";
+
+		// Default is "in copyright"
+		CopyrightStatus copyrightStatus = CopyrightStatus.IN_COPYRIGHT;
+		if (documentMetadata.has(copyrightStatusKey)) {
+			String copyrightString = documentMetadata.getString(copyrightStatusKey);
+			if (copyrightString.equalsIgnoreCase("not_in_copyright")) {
+				copyrightStatus = CopyrightStatus.NOT_IN_COPYRIGHT;
+			} else if (documentMetadata.has(licenseUrlKey)) {
+				String licenseUrlString = documentMetadata.getString(licenseUrlKey);
+				if (licenseUrlString.contains("//creativecommons.org/licenses")) {
+					copyrightStatus = CopyrightStatus.CREATIVE_COMMONS_LICENSE;
+				}
+			}
+
+			}
+
+		return copyrightStatus;
 	}
 	
 	public ArrayList<URL> getTextFileUrls() {

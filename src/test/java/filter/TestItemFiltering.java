@@ -165,6 +165,42 @@ public class TestItemFiltering {
         assertTrue(expectedMetadataFilePath.toFile().exists());
     }
 
+    @Test
+    public void testStrictItemFilteringWithOpenCopyrightStatus(@TempDir Path tempDir) throws IOException {
+        String configurationFilePath = "src/test/resources/configurations/strict-filter-bot-garden-madrid-config.yml";
+        LiteratureHarvester.CONFIGURATION_FILE_PATH_STRING = configurationFilePath;
+
+        DummyConfigurator configurator = new DummyConfigurator();
+        configurator.readConfigurationYamlFile(configurationFilePath);
+
+        literatureHarvester = new LiteratureHarvester();
+        BhlHarvester bhlHarvester = (BhlHarvester) literatureHarvester.instantiateHarvester(
+                configurator.getConfigurationForHarvesterName(BhlHarvester.BHL_STRING)
+        );
+
+        bhlHarvester.clearListOfItems();
+        bhlHarvester.addItemId("276258");
+
+        String testDirString = tempDir.toString();
+        Harvester.setOutputDirectory(testDirString);
+
+        long itemID = 276258;
+
+        Path expectedTextDirectory = Paths.get(testDirString + TEXT_SUBDIRECTORY);
+        Path expectedMetadataDirectory = Paths.get(testDirString + METADATA_SUBDIRECTORY);
+
+        Path expectedMetadataFilePath = expectedMetadataDirectory.resolve(itemID + ".xml");
+        Path expectedPdfFilePath = expectedTextDirectory.resolve("pdf/" + itemID + ".pdf");
+
+        assertFalse(expectedPdfFilePath.toFile().exists());
+        assertFalse(expectedMetadataFilePath.toFile().exists());
+
+        bhlHarvester.run();
+
+        assertTrue(expectedPdfFilePath.toFile().exists());
+        assertTrue(expectedMetadataFilePath.toFile().exists());
+    }
+
     @AfterEach
     public void cleanup() {
         configurator = null;

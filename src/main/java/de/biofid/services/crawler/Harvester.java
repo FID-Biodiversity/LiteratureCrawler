@@ -90,10 +90,11 @@ public abstract class Harvester {
 			pause();
 			boolean next = nextItem(item);
 			if (next) {
-				if (isItemValid(item)) {
+				if (isItemValid(item) || hasItemOpenLicense(item)) {
 					processItem(item);
 				} else {
-					logger.info("Item ID {} did not comply with the given filters and hence is not further processed.",
+					logger.info("Item ID {} did not comply with the given filters and is not provided under" +
+									"an open license and hence is not further processed.",
 							item.getItemId());
 				}
 			} else {
@@ -118,6 +119,11 @@ public abstract class Harvester {
 		}
 
 		return true;
+	}
+
+	private boolean hasItemOpenLicense(Item item) {
+		Item.CopyrightStatus status = item.getCopyrightStatus();
+		return (status == Item.CopyrightStatus.NOT_IN_COPYRIGHT || status == Item.CopyrightStatus.CREATIVE_COMMONS_LICENSE);
 	}
 
 	public Item createNewEmptyItem() {

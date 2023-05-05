@@ -294,6 +294,14 @@ public class BhlHarvester extends Harvester {
 	public List<Object> getListOfItems() {
     	return new ArrayList(listOfItemsToDownload);
     }
+
+	public void clearListOfItems() {
+		listOfItemsToDownload.clear();
+	}
+
+	public void addItemId(String itemId) {
+		listOfItemsToDownload.add(itemId);
+	}
     
     public void setBhlApiKey(String apiKey) {
     	this.apiKey = apiKey;
