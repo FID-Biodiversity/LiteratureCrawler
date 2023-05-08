@@ -93,7 +93,7 @@ public abstract class Harvester {
 				if (isItemValid(item) || hasItemOpenLicense(item)) {
 					processItem(item);
 				} else {
-					logger.info("Item ID {} did not comply with the given filters and is not provided under" +
+					logger.info("Item ID {} did not comply with the given filters and is not provided under " +
 									"an open license and hence is not further processed.",
 							item.getItemId());
 				}
@@ -112,8 +112,6 @@ public abstract class Harvester {
 	public boolean isItemValid(Item item) {
 		for (Filter filter : filters) {
 			if (!filter.isItemValid(item)) {
-				logger.debug("The metadata of Item {} did not comply with filter {} from Harvester {}",
-						item.getItemId(), filter, this.getClass().getName());
 				return false;
 			}
 		}

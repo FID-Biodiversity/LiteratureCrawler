@@ -176,6 +176,13 @@ public class Item {
 		return itemUrl;
 	}
 
+	/**
+	 * Checks the Item's metadata for copyright information.
+	 * Checks, if there is a field saying "NOT_IN_COPYRIGHT" or "Public domain" and if a field holds a Creative Commons URL.
+	 * If the Creative Commons URL is given, this will have priority.
+	 *
+	 * @return A CopyrightStatus object.
+	 */
 	public CopyrightStatus getCopyrightStatus() {
 		JSONObject documentMetadata = getDocumentMetadata();
 
@@ -186,16 +193,18 @@ public class Item {
 		CopyrightStatus copyrightStatus = CopyrightStatus.IN_COPYRIGHT;
 		if (documentMetadata.has(copyrightStatusKey)) {
 			String copyrightString = documentMetadata.getString(copyrightStatusKey);
-			if (copyrightString.equalsIgnoreCase("not_in_copyright")) {
+			if (copyrightString.equalsIgnoreCase("not_in_copyright") ||
+				copyrightString.toLowerCase().contains("public domain")) {
 				copyrightStatus = CopyrightStatus.NOT_IN_COPYRIGHT;
-			} else if (documentMetadata.has(licenseUrlKey)) {
+			}
+
+			if (documentMetadata.has(licenseUrlKey)) {
 				String licenseUrlString = documentMetadata.getString(licenseUrlKey);
 				if (licenseUrlString.contains("//creativecommons.org/licenses")) {
 					copyrightStatus = CopyrightStatus.CREATIVE_COMMONS_LICENSE;
 				}
 			}
-
-			}
+		}
 
 		return copyrightStatus;
 	}
