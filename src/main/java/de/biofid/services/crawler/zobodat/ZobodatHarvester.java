@@ -105,8 +105,12 @@ public class ZobodatHarvester extends Harvester {
 
 		Element nextPageButton = website.selectFirst(SELECTOR_NEXT_PAGE_BUTTON);
 		if (nextPageButton != null) {
+			logger.info("Publication list continues on next page!");
+
 			String nextPageUrlPath = Objects.requireNonNull(nextPageButton.selectFirst("a")).attr("href");
 			String nextPageUrl = generateZobodatUrlStringFromString(nextPageUrlPath, "publikation_series.php");
+
+			logger.info("Found URL " + nextPageUrl + " for next page!");
 
 			try {
 				Document nextPage = getDocumentFromUrl(nextPageUrl);
