@@ -173,6 +173,18 @@ public class TestZobodatHarvester {
 		assertFalse(item.getSaveMetadataOnly());
 	}
 
+	@Test
+	public void testPagingOfPublicationList(@TempDir Path tempDir) throws IOException {
+		DummyConfigurator configurator = setup(tempDir);
+
+		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
+				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
+		Document firstPageOfPublications = zobodatHarvester.getDocumentFromUrl("https://www.zobodat.at/publikation_series.php?id=20823");
+		Elements itemList = zobodatHarvester.getItemListFromWebsite(firstPageOfPublications);
+
+		assertEquals(140, itemList.size());
+	}
+
 	private void areAllMetadataFieldsSerialized(JSONObject item) {
 		assertTrue(item.has(METADATA_PDF_URL));
 		assertTrue(item.has(METADATA_CITATION));

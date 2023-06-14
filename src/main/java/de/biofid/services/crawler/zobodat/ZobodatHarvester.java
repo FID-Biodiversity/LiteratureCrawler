@@ -55,6 +55,8 @@ public class ZobodatHarvester extends Harvester {
 	public static final String SELECTOR_ITEM_FROM_DOCUMENT_LIST = "ul.search-results-list li.result";
 	public static final String SELECTOR_ITEM_URL = ".content a.red";
 	public static final String SELECTOR_PUBLICATION_LINK = "a.publication-link";
+
+	public static final String SELECTOR_NEXT_PAGE_BUTTON = "span.arrow.next";
 	
 	public static final String ZOBODAT_URL = "https://www.zobodat.at";
 	public static final String ZOBODAT_ARTICLE_BASE_URL = "https://www.zobodat.at/publikation_articles.php?id=";
@@ -99,7 +101,23 @@ public class ZobodatHarvester extends Harvester {
 	}
 	
 	public Elements getItemListFromWebsite(Document website) {
-		return website.select(SELECTOR_ITEM_FROM_DOCUMENT_LIST);
+		Elements elements = website.select(SELECTOR_ITEM_FROM_DOCUMENT_LIST);
+
+		Element nextPageButton = website.selectFirst(SELECTOR_NEXT_PAGE_BUTTON);
+		if (nextPageButton != null) {
+			String nextPageUrlPath = Objects.requireNonNull(nextPageButton.selectFirst("a")).attr("href");
+			String nextPageUrl = generateZobodatUrlStringFromString(nextPageUrlPath, "publikation_series.php");
+
+			try {
+				Document nextPage = getDocumentFromUrl(nextPageUrl);
+				Elements nextPageElements = getItemListFromWebsite(nextPage);
+				elements.addAll(nextPageElements);
+			} catch (IOException ex) {
+				logger.error("Could not fetch URL " + nextPageUrl + " while paging!");
+			}
+		}
+
+		return elements;
 	}
 	
 	public JSONArray getMetadataListAsJSONArray() {
@@ -239,7 +257,7 @@ public class ZobodatHarvester extends Harvester {
 		
 		pause();
 		
-		logger.info("Processing URL " + url + "");
+		logger.info("Processing URL " + url);
 		
 		Document website;
 		try {
@@ -273,6 +291,15 @@ public class ZobodatHarvester extends Harvester {
 		
 		
 		return metadataList;
+	}
+
+	private String generateZobodatUrlStringFromString(String url, String prefix) {
+		if (url.isEmpty()) {
+			return url;
+		}
+
+		String prefixedUrl = prefix + url;
+		return generateZobodatUrlStringFromString(prefixedUrl);
 	}
 	
 	private String generateZobodatUrlStringFromString(String url) {
