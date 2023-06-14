@@ -2,14 +2,11 @@ package filter;
 
 import de.biofid.services.crawler.*;
 import de.biofid.services.crawler.zobodat.ZobodatHarvester;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -40,11 +37,11 @@ public class TestItemFiltering {
 
         Item item = new Item();
         item.addMetdata("Title", "About Birds!");
-        assertFalse(instantiatedHarvester.isItemValid(item));
+        assertTrue(instantiatedHarvester.isFilteredOut(item));
 
         item = new Item();
         item.addMetdata("Title", "A Story about Testing");
-        assertTrue(instantiatedHarvester.isItemValid(item));
+        assertFalse(instantiatedHarvester.isFilteredOut(item));
     }
 
     @Test
@@ -60,19 +57,19 @@ public class TestItemFiltering {
 
         Item item = new Item();
         // Default: The item passes, if the requested metadata is not set.
-        assertTrue(instantiatedHarvester.isItemValid(item));
+        assertFalse(instantiatedHarvester.isFilteredOut(item));
 
         item = new Item();
         item.addMetdata("year", 1924);
-        assertFalse(instantiatedHarvester.isItemValid(item));
+        assertTrue(instantiatedHarvester.isFilteredOut(item));
 
         item = new Item();
         item.addMetdata("year", 1923);
-        assertTrue(instantiatedHarvester.isItemValid(item));
+        assertFalse(instantiatedHarvester.isFilteredOut(item));
 
         item = new Item();
         item.addMetdata("year", 1900);
-        assertTrue(instantiatedHarvester.isItemValid(item));
+        assertFalse(instantiatedHarvester.isFilteredOut(item));
     }
 
     @Test
@@ -88,15 +85,15 @@ public class TestItemFiltering {
 
         Item item = new Item();
         // When the filter is set "strict: true", the metadata has to exist to be passed.
-        assertFalse(instantiatedHarvester.isItemValid(item));
+        assertTrue(instantiatedHarvester.isFilteredOut(item));
 
         item = new Item();
         item.addMetdata("year", "2000");
-        assertFalse(instantiatedHarvester.isItemValid(item));
+        assertTrue(instantiatedHarvester.isFilteredOut(item));
 
         item = new Item();
         item.addMetdata("year", "2023");
-        assertTrue(instantiatedHarvester.isItemValid(item));
+        assertFalse(instantiatedHarvester.isFilteredOut(item));
     }
 
     @Test

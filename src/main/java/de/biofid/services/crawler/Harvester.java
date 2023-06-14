@@ -2,7 +2,6 @@ package de.biofid.services.crawler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.biofid.services.crawler.Item.DownloadFailedException;
 import de.biofid.services.crawler.Item.UnsupportedOutputFormatException;
 import de.biofid.services.crawler.filter.Filter;
 import org.apache.logging.log4j.LogManager;
@@ -90,7 +89,7 @@ public abstract class Harvester {
 			pause();
 			boolean next = nextItem(item);
 			if (next) {
-				if (isItemValid(item) || hasItemOpenLicense(item)) {
+				if (!isFilteredOut(item) || hasItemOpenLicense(item)) {
 					processItem(item);
 				} else {
 					logger.info("Item ID {} did not comply with the given filters and is not provided under " +
@@ -109,14 +108,14 @@ public abstract class Harvester {
 	 * @param item The {@link Item} object to check.
 	 * @return True, if the {@link Item} complies with all filters. False, otherwise.
 	 */
-	public boolean isItemValid(Item item) {
+	public boolean isFilteredOut(Item item) {
 		for (Filter filter : filters) {
 			if (!filter.isItemValid(item)) {
-				return false;
+				return true;
 			}
 		}
 
-		return true;
+		return false;
 	}
 
 	private boolean hasItemOpenLicense(Item item) {

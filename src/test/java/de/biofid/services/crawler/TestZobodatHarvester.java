@@ -185,6 +185,19 @@ public class TestZobodatHarvester {
 		assertEquals(140, itemList.size());
 	}
 
+	@Test
+	public void testDoNotRaiseIfCitationIsNull(@TempDir Path tempDir) throws IOException {
+		DummyConfigurator configurator = setup(tempDir);
+		configurator.addItemToArray(ZobodatHarvester.ZOBODAT_STRING, "items", "277963");
+
+		ZobodatHarvester zobodatHarvester = new ZobodatHarvester(
+				configurator.getConfigurationForHarvesterName(ZobodatHarvester.ZOBODAT_STRING));
+
+		Item item = new Item();
+		Metadata metadata = new Metadata(12345, new URL("https://www.zobodat.at/pdf12345"), null);
+		zobodatHarvester.addMetadataToItem(item, metadata);
+	}
+
 	private void areAllMetadataFieldsSerialized(JSONObject item) {
 		assertTrue(item.has(METADATA_PDF_URL));
 		assertTrue(item.has(METADATA_CITATION));

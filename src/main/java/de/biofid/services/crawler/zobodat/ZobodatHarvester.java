@@ -232,7 +232,10 @@ public class ZobodatHarvester extends Harvester {
 		item.setItemId(itemID);
 		item.addTextFileUrl((String) itemMetadataJSON.remove("pdfUrl"), Item.FileType.PDF);
 		item.addMetdata(ITEM_COMPLETE_METADATA, itemMetadataJSON);
-		item.setDocumentMetadata(itemMetadataJSON.getJSONObject("citation"));
+
+		if (!itemMetadataJSON.isNull("citation")) {
+			item.setDocumentMetadata(itemMetadataJSON.getJSONObject("citation"));
+		}
 	}
 
 	public boolean isItemInListOfPublicationsToStore(JSONObject itemMetadata) {
